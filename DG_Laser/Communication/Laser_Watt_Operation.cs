@@ -11,11 +11,12 @@ namespace DG_Laser
         public decimal Current_Watt;
         public int Rec_Number = 0;
         private List<int> Rec_Data = new List<int>();
-        public void Resolve_Com_Data()
+        /// <summary>
+        /// 数据处理
+        /// </summary>
+        public void Resolve_Com_Data(byte[] tmp)
         {
-            int wan, qian, bai, shi, ge;
-            byte[] tmp = new byte[Program.SystemContainer.Laser_Watt_Com.Receive_Byte.Length];
-            tmp = (byte[])Program.SystemContainer.Laser_Watt_Com.Receive_Byte.Clone();
+            int wan, qian, bai, shi, ge;            
             if (tmp.Length==1) Rec_Data.Add(Convert.ToChar(tmp[0]));
             if (Rec_Data.Count >= 64)
             {

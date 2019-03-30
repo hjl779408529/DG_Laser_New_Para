@@ -37,11 +37,10 @@ namespace DG_Laser
         /// <typeparam name="T"></typeparam>
         /// <param name="fileName"></param>
         /// <returns></returns>
-        public static List<T> Reserialize<T>(string fileName)
+        public static List<T> Reserialize<T>(string File_Path)
         {
 
             //读取文件
-            string File_Path = @"./\Config/" + fileName;
             using (FileStream fs = new FileStream(File_Path, FileMode.Open, FileAccess.Read))
             {
                 //xml 反序列化
@@ -188,82 +187,6 @@ namespace DG_Laser
                     reader.Close();
             }
         }
-        /// <summary>
-        /// 将List<Repeat_Parameter> 转换为DataTable
-        /// </summary>
-        /// <param name="repeat_Parameters"></param>
-        /// <returns></returns>
-        public static DataTable Repeat_Para_To_DT(List<Repeat_Parameter> repeat_Parameters,int type)
-        {
-            DataTable dt = new DataTable();
-            if (repeat_Parameters.Count < 1) return dt;
-            string name = null;
-            string entity_type = null;
-            string entity_name = "线型序号";
-            string entity_name_value = null;
-            if (type == 0)
-            {
-                entity_type = "Drill";
-            }
-            else if (type == 1)
-            {
-                entity_type = "Arc";
-            }
-            else if (type == 2)
-            {
-                entity_type = "Line";
-            }
-            dt.Columns.Add(entity_name, typeof(string));
-            //添加列
-            for (int i = 0;i < repeat_Parameters[0].Repeat.Length; i++)
-            {
-                name = "第" + (i + 1) + "次";
-                dt.Columns.Add(name,typeof(byte));
-            }
-            
-            //添加数据
-            for (int i = 0;i < repeat_Parameters.Count;i++)
-            {
-                DataRow dataRow = dt.NewRow();
-                entity_name_value = entity_type + i;
-                dataRow[entity_name] = entity_name_value;
-                for (int j = 0;j < repeat_Parameters[i].Repeat.Length;j++)
-                {
-                    name = "第" + (j + 1) + "次";
-                    dataRow[name] = repeat_Parameters[i].Repeat[j];
-                }
-                dt.Rows.Add(dataRow);
-            }
-            return dt;
-        }
-        /// <summary>
-        /// 将DataTable 转换为List<Repeat_Parameter>
-        /// </summary>
-        /// <param name="dt"></param>
-        /// <returns></returns>
-        public static List<Repeat_Parameter> DT_Repeat_Para_To(DataTable dt)
-        {
-            List<Repeat_Parameter> Result = new List<Repeat_Parameter>();
-            if ((dt.Rows.Count < 1) || (dt.Columns.Count != (Program.SystemContainer.SysPara.Work_Repeat_Limit + 1))) return Result;
-            Repeat_Parameter Tmp_Para = new Repeat_Parameter();
-            string name = null;
-            //处理数据
-            for (int i = 0;i < dt.Rows.Count; i++)
-            {
-                byte tmp_value = 0;
-                DataRow dataRow = dt.Rows[i];
-                Tmp_Para.Empty();
-                for (int j = 0;j < dt.Columns.Count - 1;j++)
-                {
-                    name = "第" + (j + 1) +"次";
-                    if (byte.TryParse(dataRow[name].ToString(), out tmp_value))
-                        Tmp_Para.Repeat[j] = tmp_value;
-                    else
-                        Tmp_Para.Repeat[j] = 1;
-                }
-                Result.Add(new Repeat_Parameter(Tmp_Para));
-            }
-            return Result;
-        }
+        
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -18,7 +19,7 @@ namespace DG_Laser
         /// <param name="fileName">CSV的文件路径</param>
         public static void SaveCSV(DataTable dt, string fileName) 
         {
-            string sdatetime = DateTime.Now.ToString("D");
+            string sdatetime = DateTime.Now.ToString("yyyy_MM_dd HH_mm_ss", DateTimeFormatInfo.InvariantInfo);
             string[] tmp = fileName.Split('.');
             string fullPath = @"./\Config/" + tmp[0] + " " + sdatetime + ".csv";
             FileInfo fi = new FileInfo(fullPath);

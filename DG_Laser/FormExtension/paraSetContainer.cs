@@ -2,450 +2,283 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DG_Laser
 {
      /// <summary>
-     /// RTC手动操作页面
+     /// 参数页面
      /// </summary>
     partial class MainForm
     {
-       
+        //定义变量
+        public bool SysParaWRFlag = false;
         /// <summary>
         /// paraSetContainerInitial
         /// </summary>
         private void paraSetContainerInitial()
-        {            
-            //Mark点相关          
-            Set_txt_markX1.Text = Program.SystemContainer.SysPara.Mark1.X.ToString();
-            Set_txt_markY1.Text = Program.SystemContainer.SysPara.Mark1.Y.ToString();
-            Set_txt_markX2.Text = Program.SystemContainer.SysPara.Mark2.X.ToString();
-            Set_txt_markY2.Text = Program.SystemContainer.SysPara.Mark2.Y.ToString();
-            Set_txt_markX3.Text = Program.SystemContainer.SysPara.Mark3.X.ToString();
-            Set_txt_markY3.Text = Program.SystemContainer.SysPara.Mark3.Y.ToString();
-            Set_txt_markX4.Text = Program.SystemContainer.SysPara.Mark4.X.ToString();
-            Set_txt_markY4.Text = Program.SystemContainer.SysPara.Mark4.Y.ToString();
-            
-            //偏差矫正
-            Set_txt_valueK.Text = Program.SystemContainer.SysPara.Cam_Reference.ToString();
-            RefreshRtcOrgDistance();
-            //加工参数
-            //工件坐标系偏移
-            RefreshWork();
-            //直线插补
-            LineVelocitySet.Text = Program.SystemContainer.SysPara.Line_synVel.ToString(6);
-            LineACCSet.Text = Program.SystemContainer.SysPara.Line_synAcc.ToString(6);
-            //圆弧插补
-            ArcVelocitySet.Text = Program.SystemContainer.SysPara.Circle_synVel.ToString(6);
-            ArcACCSet.Text = Program.SystemContainer.SysPara.Circle_synAcc.ToString(6);
-            //坐标运动平滑系数
-            SmoothTimeSet.Text = Program.SystemContainer.SysPara.Syn_EvenTime.ToString(6);
-            //插补终止速度
-            LineEndVelocitySet.Text = Program.SystemContainer.SysPara.Line_endVel.ToString(6);
-            ArcEndVelocitySet.Text = Program.SystemContainer.SysPara.Circle_endVel.ToString(6);
+        {
+            RefreshSysPara();// 刷新系统参数页面
+            //绑定值修改事件
+            RtcOrgDistanceXnumericUpDown.ValueChanged += UpdateSysPara;
+            RtcOrgDistanceYnumericUpDown.ValueChanged += UpdateSysPara;
+            WorkXnumericUpDown.ValueChanged += UpdateSysPara;
+            WorkYnumericUpDown.ValueChanged += UpdateSysPara;
+            GtsCorrectFilePathtextBox.TextChanged += UpdateSysPara;
+            MarkJumpcheckBox.CheckedChanged += UpdateSysPara;
+            CamEncheckBox.CheckedChanged += UpdateSysPara;            
+            ShieldbeepTimenumericUpDown.ValueChanged += UpdateSysPara;
+            //绑定事件
+            CalibrationSelectcomboBox.SelectedIndexChanged += SwitchCalibrationSelectcomboBox;
+            CorrectMethodcomboBox.SelectedIndexChanged += UpdateSysPara;
+            YCellnumericUpDown.ValueChanged += UpdateSysPara;
+            XCellnumericUpDown.ValueChanged += UpdateSysPara;
+            YLengthnumericUpDown.ValueChanged += UpdateSysPara;
+            XLengthnumericUpDown.ValueChanged += UpdateSysPara;
+            RtcMarkTypecomboBox.SelectedIndexChanged += UpdateSysPara;
+            RtcAligncheckBox.CheckedChanged += UpdateSysPara;
+            RtcCircleRadiusnumericUpDown.ValueChanged += UpdateSysPara;
+            PointListRepeatTimesnumericUpDown.ValueChanged += UpdateSysPara;
         }
         /// <summary>
-        /// 舒心振镜与Org距离
+        /// 刷新系统参数页面
+        /// </summary>
+        private void RefreshSysPara()
+        {
+            //置位标志
+            SysParaWRFlag = true;
+            Thread.Sleep(30);
+            //参数
+            RtcOrgDistanceXnumericUpDown.Value = Program.SystemContainer.SysPara.Rtc_Org.X;
+            RtcOrgDistanceYnumericUpDown.Value = Program.SystemContainer.SysPara.Rtc_Org.Y;
+            WorkXnumericUpDown.Value = Program.SystemContainer.SysPara.Work.X;
+            WorkYnumericUpDown.Value = Program.SystemContainer.SysPara.Work.Y;
+            GtsCorrectFilePathtextBox.Text = Program.SystemContainer.SysPara.GtsCorrectFile;
+            MarkJumpcheckBox.Checked = Program.SystemContainer.SysPara.MarkJump;
+            CamEncheckBox.Checked = Program.SystemContainer.SysPara.CamEn;            
+            ShieldbeepTimenumericUpDown.Value = Program.SystemContainer.SysPara.ShieldBeepTime;
+            //校准
+            CalibrationSelectcomboBox.SelectedIndex = Program.SystemContainer.SysPara.CalibrationSelect;
+            switch (CalibrationSelectcomboBox.SelectedIndex)
+            {
+                case 0:
+                    CorrectMethodcomboBox.SelectedIndex = Program.SystemContainer.SysPara.Gts_Calibration_Method == 3 ? 0 : 1;
+                    XLengthnumericUpDown.Value = Program.SystemContainer.SysPara.Gts_Calibration_X_Len;
+                    YLengthnumericUpDown.Value = Program.SystemContainer.SysPara.Gts_Calibration_Y_Len;
+                    XCellnumericUpDown.Value = Program.SystemContainer.SysPara.Gts_Calibration_X_Cell != 0 ? Program.SystemContainer.SysPara.Gts_Calibration_X_Cell : 1;
+                    YCellnumericUpDown.Value = Program.SystemContainer.SysPara.Gts_Calibration_Y_Cell != 0 ? Program.SystemContainer.SysPara.Gts_Calibration_Y_Cell : 1;
+                    Program.SystemContainer.SysPara.Gts_Affinity_Col_X = Program.SystemContainer.SysPara.Gts_Calibration_X_Cell != 0 ? (int)(Program.SystemContainer.SysPara.Gts_Calibration_X_Len / Program.SystemContainer.SysPara.Gts_Calibration_X_Cell) : 1;
+                    Program.SystemContainer.SysPara.Gts_Affinity_Row_Y = Program.SystemContainer.SysPara.Gts_Calibration_Y_Cell != 0 ? (int)(Program.SystemContainer.SysPara.Gts_Calibration_Y_Len / Program.SystemContainer.SysPara.Gts_Calibration_Y_Cell) : 1;
+                    Program.SystemContainer.SysPara.Gts_Calibration_Col_X = Program.SystemContainer.SysPara.Gts_Affinity_Col_X + 1;
+                    Program.SystemContainer.SysPara.Gts_Calibration_Row_Y = Program.SystemContainer.SysPara.Gts_Affinity_Row_Y + 1;
+                    XCalibratetextBox.Text = Program.SystemContainer.SysPara.Gts_Calibration_Col_X.ToString();
+                    YCalibratetextBox.Text = Program.SystemContainer.SysPara.Gts_Calibration_Row_Y.ToString();
+                    XAffinitytextBox.Text = Program.SystemContainer.SysPara.Gts_Affinity_Col_X.ToString();
+                    YAffinitytextBox.Text = Program.SystemContainer.SysPara.Gts_Affinity_Row_Y.ToString();
+                    RtcMarkParagroupBox.Enabled = false;
+                    break;
+                case 1:
+                    CorrectMethodcomboBox.SelectedIndex = Program.SystemContainer.SysPara.Rtc_Calibration_Method == 3 ? 0 : 1;
+                    XLengthnumericUpDown.Value = Program.SystemContainer.SysPara.Rtc_Calibration_X_Len;
+                    YLengthnumericUpDown.Value = Program.SystemContainer.SysPara.Rtc_Calibration_Y_Len;
+                    XCellnumericUpDown.Value = Program.SystemContainer.SysPara.Rtc_Calibration_X_Cell != 0 ? Program.SystemContainer.SysPara.Rtc_Calibration_X_Cell : 1;
+                    YCellnumericUpDown.Value = Program.SystemContainer.SysPara.Rtc_Calibration_Y_Cell != 0 ? Program.SystemContainer.SysPara.Rtc_Calibration_Y_Cell : 1;
+                    Program.SystemContainer.SysPara.Rtc_Affinity_Col_X = Program.SystemContainer.SysPara.Rtc_Calibration_X_Cell != 0 ? (int)(Program.SystemContainer.SysPara.Rtc_Calibration_X_Len / Program.SystemContainer.SysPara.Rtc_Calibration_X_Cell) : 1;
+                    Program.SystemContainer.SysPara.Rtc_Affinity_Row_Y = Program.SystemContainer.SysPara.Rtc_Calibration_Y_Cell != 0 ? (int)(Program.SystemContainer.SysPara.Rtc_Calibration_Y_Len / Program.SystemContainer.SysPara.Rtc_Calibration_Y_Cell) : 1;
+                    Program.SystemContainer.SysPara.Rtc_Calibration_Col_X = Program.SystemContainer.SysPara.Rtc_Affinity_Col_X + 1;
+                    Program.SystemContainer.SysPara.Rtc_Calibration_Row_Y = Program.SystemContainer.SysPara.Rtc_Affinity_Row_Y + 1;
+                    XCalibratetextBox.Text = Program.SystemContainer.SysPara.Rtc_Calibration_Col_X.ToString();
+                    YCalibratetextBox.Text = Program.SystemContainer.SysPara.Rtc_Calibration_Row_Y.ToString();
+                    XAffinitytextBox.Text = Program.SystemContainer.SysPara.Rtc_Affinity_Col_X.ToString();
+                    YAffinitytextBox.Text = Program.SystemContainer.SysPara.Rtc_Affinity_Row_Y.ToString();
+                    RtcMarkTypecomboBox.SelectedIndex = Program.SystemContainer.SysPara.Rtc_Distortion_Data_Type;
+                    RtcAligncheckBox.Checked = Program.SystemContainer.SysPara.Rtc_Get_Data_Align == 0 ? false : true;
+                    RtcCorrectTypecheckBox.Checked = Program.SystemContainer.SysPara.RtcCorrectType == 0 ? false : true;
+                    switch (Program.SystemContainer.SysPara.Rtc_Distortion_Data_Type)
+                    {
+                        case 0://0 - 圆
+                            RtcCircleRadiusLabel.Visible = true;
+                            RtcCircleRadiusnumericUpDown.Visible = true;
+                            RtcCircleRadiusnumericUpDown.Value = Program.SystemContainer.SysPara.Rtc_Distortion_Data_Radius;
+                            break;
+                        default://其他 - 直线
+                            RtcCircleRadiusLabel.Visible = false;
+                            RtcCircleRadiusnumericUpDown.Visible = false;
+                            break;
+                    }                    
+                    RtcMarkParagroupBox.Enabled = true;
+                    break;
+                default:
+                    break;
+            }
+            RtcXmlCorrectFilePathtextBox.Text = Program.SystemContainer.SysPara.RtcXmlCorrectFilePath;//振镜坐标系Xml矫正文件路径
+            GtsCorrectFilePathtextBox.Text = Program.SystemContainer.SysPara.GtsCorrectFilePath;//平台Xml校准文件路径
+            PointListRepeatTimesnumericUpDown.Value = Program.SystemContainer.SysPara.PointListRepeatTimes;
+            //取消标志
+            Thread.Sleep(30);
+            SysParaWRFlag = false;
+        }
+        /// <summary>
+        /// 切换标定位置
+        /// </summary>
+        private void SwitchCalibrationSelectcomboBox(object sender, EventArgs e)
+        {   
+            //置位标志
+            SysParaWRFlag = true;
+            Thread.Sleep(30);
+            //校准
+            Program.SystemContainer.SysPara.CalibrationSelect = CalibrationSelectcomboBox.SelectedIndex;
+            switch (CalibrationSelectcomboBox.SelectedIndex)
+            {
+                case 0:
+                    CorrectMethodcomboBox.SelectedIndex = Program.SystemContainer.SysPara.Gts_Calibration_Method == 3 ? 0 : 1;
+                    XLengthnumericUpDown.Value = Program.SystemContainer.SysPara.Gts_Calibration_X_Len;
+                    YLengthnumericUpDown.Value = Program.SystemContainer.SysPara.Gts_Calibration_Y_Len;
+                    XCellnumericUpDown.Value = Program.SystemContainer.SysPara.Gts_Calibration_X_Cell != 0 ? Program.SystemContainer.SysPara.Gts_Calibration_X_Cell : 1;
+                    YCellnumericUpDown.Value = Program.SystemContainer.SysPara.Gts_Calibration_Y_Cell != 0 ? Program.SystemContainer.SysPara.Gts_Calibration_Y_Cell : 1;
+                    Program.SystemContainer.SysPara.Gts_Affinity_Col_X = Program.SystemContainer.SysPara.Gts_Calibration_X_Cell != 0 ? (int)(Program.SystemContainer.SysPara.Gts_Calibration_X_Len / Program.SystemContainer.SysPara.Gts_Calibration_X_Cell) : 1;
+                    Program.SystemContainer.SysPara.Gts_Affinity_Row_Y = Program.SystemContainer.SysPara.Gts_Calibration_Y_Cell != 0 ? (int)(Program.SystemContainer.SysPara.Gts_Calibration_Y_Len / Program.SystemContainer.SysPara.Gts_Calibration_Y_Cell) : 1;
+                    Program.SystemContainer.SysPara.Gts_Calibration_Col_X = Program.SystemContainer.SysPara.Gts_Affinity_Col_X + 1;
+                    Program.SystemContainer.SysPara.Gts_Calibration_Row_Y = Program.SystemContainer.SysPara.Gts_Affinity_Row_Y + 1;
+                    XCalibratetextBox.Text = Program.SystemContainer.SysPara.Gts_Calibration_Col_X.ToString();
+                    YCalibratetextBox.Text = Program.SystemContainer.SysPara.Gts_Calibration_Row_Y.ToString();
+                    XAffinitytextBox.Text = Program.SystemContainer.SysPara.Gts_Affinity_Col_X.ToString();
+                    YAffinitytextBox.Text = Program.SystemContainer.SysPara.Gts_Affinity_Row_Y.ToString();
+                    RtcMarkParagroupBox.Enabled = false;
+                    break;
+                case 1:
+                    CorrectMethodcomboBox.SelectedIndex = Program.SystemContainer.SysPara.Rtc_Calibration_Method == 3 ? 0 : 1;
+                    XLengthnumericUpDown.Value = Program.SystemContainer.SysPara.Rtc_Calibration_X_Len;
+                    YLengthnumericUpDown.Value = Program.SystemContainer.SysPara.Rtc_Calibration_Y_Len;
+                    XCellnumericUpDown.Value = Program.SystemContainer.SysPara.Rtc_Calibration_X_Cell != 0 ? Program.SystemContainer.SysPara.Rtc_Calibration_X_Cell : 1;
+                    YCellnumericUpDown.Value = Program.SystemContainer.SysPara.Rtc_Calibration_Y_Cell != 0 ? Program.SystemContainer.SysPara.Rtc_Calibration_Y_Cell : 1;
+                    Program.SystemContainer.SysPara.Rtc_Affinity_Col_X = Program.SystemContainer.SysPara.Rtc_Calibration_X_Cell != 0 ? (int)(Program.SystemContainer.SysPara.Rtc_Calibration_X_Len / Program.SystemContainer.SysPara.Rtc_Calibration_X_Cell) : 1;
+                    Program.SystemContainer.SysPara.Rtc_Affinity_Row_Y = Program.SystemContainer.SysPara.Rtc_Calibration_Y_Cell != 0 ? (int)(Program.SystemContainer.SysPara.Rtc_Calibration_Y_Len / Program.SystemContainer.SysPara.Rtc_Calibration_Y_Cell) : 1;
+                    Program.SystemContainer.SysPara.Rtc_Calibration_Col_X = Program.SystemContainer.SysPara.Rtc_Affinity_Col_X + 1;
+                    Program.SystemContainer.SysPara.Rtc_Calibration_Row_Y = Program.SystemContainer.SysPara.Rtc_Affinity_Row_Y + 1;
+                    XCalibratetextBox.Text = Program.SystemContainer.SysPara.Rtc_Calibration_Col_X.ToString();
+                    YCalibratetextBox.Text = Program.SystemContainer.SysPara.Rtc_Calibration_Row_Y.ToString();
+                    XAffinitytextBox.Text = Program.SystemContainer.SysPara.Rtc_Affinity_Col_X.ToString();
+                    YAffinitytextBox.Text = Program.SystemContainer.SysPara.Rtc_Affinity_Row_Y.ToString();
+                    RtcMarkTypecomboBox.SelectedIndex = Program.SystemContainer.SysPara.Rtc_Distortion_Data_Type;
+                    RtcAligncheckBox.Checked = Program.SystemContainer.SysPara.Rtc_Get_Data_Align == 0 ? false : true;
+                    RtcCorrectTypecheckBox.Checked = Program.SystemContainer.SysPara.RtcCorrectType == 0 ? false : true;
+                    switch (Program.SystemContainer.SysPara.Rtc_Distortion_Data_Type)
+                    {
+                        case 0://0 - 圆
+                            RtcCircleRadiusLabel.Visible = true;
+                            RtcCircleRadiusnumericUpDown.Visible = true;
+                            RtcCircleRadiusnumericUpDown.Value = Program.SystemContainer.SysPara.Rtc_Distortion_Data_Radius;
+                            break;
+                        default://其他 - 直线
+                            RtcCircleRadiusLabel.Visible = false;
+                            RtcCircleRadiusnumericUpDown.Visible = false;
+                            break;
+                    }
+                    RtcMarkParagroupBox.Enabled = true;
+                    break;
+                default:
+                    break;
+            }
+            //取消标志
+            Thread.Sleep(30);
+            SysParaWRFlag = false;
+        }
+        /// <summary>
+        /// 刷新振镜与Org距离
         /// </summary>
         private void RefreshRtcOrgDistance()
         {
-            RtcOrgDistanceX.Text = Program.SystemContainer.SysPara.Rtc_Org.X.ToString(6);
-            RtcOrgDistanceY.Text = Program.SystemContainer.SysPara.Rtc_Org.Y.ToString(6);
+            SysParaWRFlag = true;
+            Thread.Sleep(30);
+            RtcOrgDistanceXnumericUpDown.Value = Program.SystemContainer.SysPara.Rtc_Org.X;
+            RtcOrgDistanceYnumericUpDown.Value = Program.SystemContainer.SysPara.Rtc_Org.Y;
+            Thread.Sleep(30);
+            SysParaWRFlag = false;
         }
         /// <summary>
         /// 刷新工作坐标
         /// </summary>
         private void RefreshWork()
         {
-            WorkX.Text = Program.SystemContainer.SysPara.Work.X.ToString(6);
-            WorkY.Text = Program.SystemContainer.SysPara.Work.Y.ToString(6);
-        }
-        
-        /// <summary>
-        /// Mark1X
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Set_txt_markX1_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(Set_txt_markX1.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            if ((tmp >= 0) && (tmp <= 350))
-            {
-                Program.SystemContainer.SysPara.Mark1 = new Vector(tmp, Program.SystemContainer.SysPara.Mark1.Y);
-            }
-            else
-            {
-                MessageBox.Show("请确认数值在0-350范围内");
-                return;
-            }
+            SysParaWRFlag = true;
+            Thread.Sleep(30);
+            WorkXnumericUpDown.Value = Program.SystemContainer.SysPara.Work.X;
+            WorkYnumericUpDown.Value = Program.SystemContainer.SysPara.Work.Y;
+            Thread.Sleep(30);
+            SysParaWRFlag = false;
         }
         /// <summary>
-        /// Mark1Y
+        /// 更新系统参数
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Set_txt_markY1_TextChanged(object sender, EventArgs e)
+        private void UpdateSysPara(object sender, EventArgs e)
         {
-            if (!decimal.TryParse(Set_txt_markY1.Text, out decimal tmp))
+            if (SysParaWRFlag) return;
+            Program.SystemContainer.SysPara.Rtc_Org = new Vector(RtcOrgDistanceXnumericUpDown.Value, RtcOrgDistanceYnumericUpDown.Value);
+            Program.SystemContainer.SysPara.Work = new Vector(WorkXnumericUpDown.Value, WorkYnumericUpDown.Value);
+            Program.SystemContainer.SysPara.GtsCorrectFile = GtsCorrectFilePathtextBox.Text;
+            Program.SystemContainer.SysPara.MarkJump = MarkJumpcheckBox.Checked;
+            Program.SystemContainer.SysPara.CamEn = CamEncheckBox.Checked;            
+            Program.SystemContainer.SysPara.ShieldBeepTime = (int)ShieldbeepTimenumericUpDown.Value;
+            //更新校准参数
+            Program.SystemContainer.SysPara.CalibrationSelect = CalibrationSelectcomboBox.SelectedIndex;
+            switch (CalibrationSelectcomboBox.SelectedIndex)
             {
-                MessageBox.Show("请正确输入数字");
-                return;
+                case 0:
+                    Program.SystemContainer.SysPara.Gts_Calibration_Method = CorrectMethodcomboBox.SelectedIndex == 0 ? 3 : 4;
+                    Program.SystemContainer.SysPara.Gts_Calibration_X_Len = XLengthnumericUpDown.Value;
+                    Program.SystemContainer.SysPara.Gts_Calibration_Y_Len = YLengthnumericUpDown.Value;
+                    Program.SystemContainer.SysPara.Gts_Calibration_X_Cell = XCellnumericUpDown.Value;
+                    Program.SystemContainer.SysPara.Gts_Calibration_Y_Cell = YCellnumericUpDown.Value;
+                    Program.SystemContainer.SysPara.Gts_Affinity_Col_X = Program.SystemContainer.SysPara.Gts_Calibration_X_Cell != 0 ? (int)(Program.SystemContainer.SysPara.Gts_Calibration_X_Len / Program.SystemContainer.SysPara.Gts_Calibration_X_Cell) : 1;
+                    Program.SystemContainer.SysPara.Gts_Affinity_Row_Y = Program.SystemContainer.SysPara.Gts_Calibration_Y_Cell != 0 ? (int)(Program.SystemContainer.SysPara.Gts_Calibration_Y_Len / Program.SystemContainer.SysPara.Gts_Calibration_Y_Cell) : 1;
+                    Program.SystemContainer.SysPara.Gts_Calibration_Col_X = Program.SystemContainer.SysPara.Gts_Affinity_Col_X + 1;
+                    Program.SystemContainer.SysPara.Gts_Calibration_Row_Y = Program.SystemContainer.SysPara.Gts_Affinity_Row_Y + 1;
+                    XCalibratetextBox.Text = Program.SystemContainer.SysPara.Gts_Calibration_Col_X.ToString();
+                    YCalibratetextBox.Text = Program.SystemContainer.SysPara.Gts_Calibration_Row_Y.ToString();
+                    XAffinitytextBox.Text = Program.SystemContainer.SysPara.Gts_Affinity_Col_X.ToString();
+                    YAffinitytextBox.Text = Program.SystemContainer.SysPara.Gts_Affinity_Row_Y.ToString();
+                    RtcMarkParagroupBox.Enabled = false;
+                    break;
+                case 1:
+                    Program.SystemContainer.SysPara.Rtc_Calibration_Method = CorrectMethodcomboBox.SelectedIndex == 0 ? 3 : 4;
+                    Program.SystemContainer.SysPara.Rtc_Calibration_X_Len = XLengthnumericUpDown.Value;
+                    Program.SystemContainer.SysPara.Rtc_Calibration_Y_Len = YLengthnumericUpDown.Value;
+                    Program.SystemContainer.SysPara.Rtc_Calibration_X_Cell = XCellnumericUpDown.Value;
+                    Program.SystemContainer.SysPara.Rtc_Calibration_Y_Cell = YCellnumericUpDown.Value;
+                    Program.SystemContainer.SysPara.Rtc_Affinity_Col_X = Program.SystemContainer.SysPara.Rtc_Calibration_X_Cell != 0 ? (int)(Program.SystemContainer.SysPara.Rtc_Calibration_X_Len / Program.SystemContainer.SysPara.Rtc_Calibration_X_Cell) : 1;
+                    Program.SystemContainer.SysPara.Rtc_Affinity_Row_Y = Program.SystemContainer.SysPara.Rtc_Calibration_Y_Cell != 0 ? (int)(Program.SystemContainer.SysPara.Rtc_Calibration_Y_Len / Program.SystemContainer.SysPara.Rtc_Calibration_Y_Cell) : 1;
+                    Program.SystemContainer.SysPara.Rtc_Calibration_Col_X = Program.SystemContainer.SysPara.Rtc_Affinity_Col_X + 1;
+                    Program.SystemContainer.SysPara.Rtc_Calibration_Row_Y = Program.SystemContainer.SysPara.Rtc_Affinity_Row_Y + 1;
+                    XCalibratetextBox.Text = Program.SystemContainer.SysPara.Rtc_Calibration_Col_X.ToString();
+                    YCalibratetextBox.Text = Program.SystemContainer.SysPara.Rtc_Calibration_Row_Y.ToString();
+                    XAffinitytextBox.Text = Program.SystemContainer.SysPara.Rtc_Affinity_Col_X.ToString();
+                    YAffinitytextBox.Text = Program.SystemContainer.SysPara.Rtc_Affinity_Row_Y.ToString();
+                    Program.SystemContainer.SysPara.Rtc_Distortion_Data_Type = RtcMarkTypecomboBox.SelectedIndex;
+                    Program.SystemContainer.SysPara.Rtc_Get_Data_Align = RtcAligncheckBox.Checked ? 1 : 0;
+                    Program.SystemContainer.SysPara.RtcCorrectType = RtcCorrectTypecheckBox.Checked ? 1 : 0;
+                    switch (Program.SystemContainer.SysPara.Rtc_Distortion_Data_Type)
+                    {
+                        case 0://0 - 圆
+                            RtcCircleRadiusLabel.Visible = true;
+                            RtcCircleRadiusnumericUpDown.Visible = true;
+                            Program.SystemContainer.SysPara.Rtc_Distortion_Data_Radius = RtcCircleRadiusnumericUpDown.Value;
+                            break;
+                        default://其他 - 直线
+                            RtcCircleRadiusLabel.Visible = false;
+                            RtcCircleRadiusnumericUpDown.Visible = false;
+                            break;
+                    }
+                    RtcMarkParagroupBox.Enabled = true;
+                    break;
+                default:
+                    break;
             }
-            if ((tmp >= 0) && (tmp <= 350))
-            {
-                Program.SystemContainer.SysPara.Mark1 = new Vector(Program.SystemContainer.SysPara.Mark1.X,tmp);
-            }
-            else
-            {
-                MessageBox.Show("请确认数值在0-350范围内");
-                return;
-            }
+            Program.SystemContainer.SysPara.PointListRepeatTimes = (int)PointListRepeatTimesnumericUpDown.Value;
         }
-        /// <summary>
-        /// Mark2X
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Set_txt_markX2_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(Set_txt_markX2.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            if ((tmp >= 0) && (tmp <= 350))
-            {
-                Program.SystemContainer.SysPara.Mark2 = new Vector(tmp, Program.SystemContainer.SysPara.Mark2.Y);
-            }
-            else
-            {
-                MessageBox.Show("请确认数值在0-350范围内");
-                return;
-            }
-        }
-        /// <summary>
-        /// Mark2Y
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-
-        private void Set_txt_markY2_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(Set_txt_markY2.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            if ((tmp >= 0) && (tmp <= 350))
-            {
-                Program.SystemContainer.SysPara.Mark2 = new Vector(Program.SystemContainer.SysPara.Mark2.X, tmp);
-            }
-            else
-            {
-                MessageBox.Show("请确认数值在0-350范围内");
-                return;
-            }
-        }
-        /// <summary>
-        /// Mark3X
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-
-        private void Set_txt_markX3_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(Set_txt_markX3.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            if ((tmp >= 0) && (tmp <= 350))
-            {
-                Program.SystemContainer.SysPara.Mark3 = new Vector(tmp, Program.SystemContainer.SysPara.Mark3.Y);
-            }
-            else
-            {
-                MessageBox.Show("请确认数值在0-350范围内");
-                return;
-            }
-        }
-        /// <summary>
-        /// Mark3Y
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Set_txt_markY3_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(Set_txt_markY3.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            if ((tmp >= 0) && (tmp <= 350))
-            {
-                Program.SystemContainer.SysPara.Mark3 = new Vector(Program.SystemContainer.SysPara.Mark3.X, tmp);
-            }
-            else
-            {
-                MessageBox.Show("请确认数值在0-350范围内");
-                return;
-            }
-        }
-        /// <summary>
-        /// Mark4X
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Set_txt_markX4_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(Set_txt_markX4.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            if ((tmp >= 0) && (tmp <= 350))
-            {
-                Program.SystemContainer.SysPara.Mark4 = new Vector(tmp, Program.SystemContainer.SysPara.Mark4.Y);
-            }
-            else
-            {
-                MessageBox.Show("请确认数值在0-350范围内");
-                return;
-            }
-        }
-        /// <summary>
-        /// Mark4Y
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Set_txt_markY4_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(Set_txt_markY4.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            if ((tmp >= 0) && (tmp <= 350))
-            {
-                Program.SystemContainer.SysPara.Mark4 = new Vector(Program.SystemContainer.SysPara.Mark4.X, tmp);
-            }
-            else
-            {
-                MessageBox.Show("请确认数值在0-350范围内");
-                return;
-            }
-        }
-        /// <summary>
-        /// 定位至Mark1
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void GoMark1_Click(object sender, EventArgs e)
-        {
-            Program.SystemContainer.GTS_Fun.Gts_Ready_Correct(Program.SystemContainer.SysPara.Mark1);
-        }
-        /// <summary>
-        /// 定位至Mark2
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void GoMark2_Click(object sender, EventArgs e)
-        {
-            Program.SystemContainer.GTS_Fun.Gts_Ready_Correct(Program.SystemContainer.SysPara.Mark2);
-        }
-        /// <summary>
-        /// 定位至Mark3
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void GoMark3_Click(object sender, EventArgs e)
-        {
-            Program.SystemContainer.GTS_Fun.Gts_Ready_Correct(Program.SystemContainer.SysPara.Mark3);
-        }
-        /// <summary>
-        /// 定位至Mark4
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void GoMark4_Click(object sender, EventArgs e)
-        {
-            Program.SystemContainer.GTS_Fun.Gts_Ready_Correct(Program.SystemContainer.SysPara.Mark4);
-        }
-        /// <summary>
-        /// 像素分辨率
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Set_txt_valueK_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(Set_txt_valueK.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Cam_Reference = tmp;
-        }
-        /// <summary>
-        /// 振镜与坐标原点距离X
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void RtcOrgDistanceX_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(RtcOrgDistanceX.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Rtc_Org = new Vector(tmp, Program.SystemContainer.SysPara.Rtc_Org.Y);
-        }
-        /// <summary>
-        /// 振镜与坐标原点距离Y
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-
-        private void RtcOrgDistanceY_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(RtcOrgDistanceY.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Rtc_Org = new Vector(Program.SystemContainer.SysPara.Rtc_Org.X,tmp);
-        }
-        /// <summary>
-        /// 加工坐标系X
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void WorkX_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(WorkX.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Work = new Vector(tmp, Program.SystemContainer.SysPara.Work.Y);
-        }
-        /// <summary>
-        /// 加工坐标系Y
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void WorkY_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(WorkY.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Work = new Vector(Program.SystemContainer.SysPara.Work.X,tmp);
-        }
-        /// <summary>
-        /// 合成平滑时间
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void SmoothTimeSet_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(SmoothTimeSet.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Syn_EvenTime = tmp;
-        }
-        /// <summary>
-        /// 直线合成速度
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void LineVelocitySet_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(LineVelocitySet.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Line_synVel = tmp;
-        }
-        /// <summary>
-        /// 直线合成加速度
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void LineACCSet_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(LineACCSet.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Line_synAcc = tmp;
-        }
-        /// <summary>
-        /// 直线合成终止速度
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void LineEndVelocitySet_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(LineEndVelocitySet.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Line_endVel = tmp;
-        }
-        /// <summary>
-        /// 圆弧合成速度
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ArcVelocitySet_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(ArcVelocitySet.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Circle_synVel = tmp;
-        }
-        /// <summary>
-        /// 圆弧合成加速度
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ArcACCSet_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(ArcACCSet.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Circle_synAcc = tmp;
-        }
-        /// <summary>
-        /// 圆弧合成终止速度
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ArcEndVelocitySet_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(ArcEndVelocitySet.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Circle_endVel = tmp;
-        }
+       
         /// <summary>
         /// 系统参数保存
         /// </summary>
@@ -462,7 +295,82 @@ namespace DG_Laser
         /// <param name="e"></param>
         private void SyaParaRead_Click(object sender, EventArgs e)
         {
-            Program.SystemContainer.SysPara = OperatePara.LoadParaXml("Para"); 
+            DialogResult dr = MessageBox.Show("确认覆盖当前系统参数？", "系统参数覆盖", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+            if (dr == DialogResult.OK)
+            {
+                Program.SystemContainer.SysPara = OperatePara.LoadParaXml("Para");
+                //更新数据
+                RefreshSysPara();// 刷新系统参数页面
+                RefreshWorkPara();//刷新WorkPara参数
+                RefreshAXisPara();//轴参数页面参数更新
+                RefreshLaserHandlePara();//刷新激光页参数数据
+                RefreshMainContainerPara();//刷新主页面参数
+                RefreshMannualGtsPara();//刷新Gts页面参数值
+                RefreshRtcPara();//更新RTC页面参数
+            }           
+        }       
+        
+        /// <summary>
+        /// 选择平台校准文件Xml
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SelectGtsCorrectFilebutton_Click(object sender, EventArgs e)
+        {
+            // 获取文件名       
+            OpenFileDialog openfile = new OpenFileDialog
+            {
+                Filter = "xml 文件(*.xml)|*.xml"
+            };
+            if (openfile.ShowDialog() == DialogResult.OK)
+            {
+                Program.SystemContainer.SysPara.GtsCorrectFilePath = openfile.FileName;
+                Program.SystemContainer.SysPara.GtsCorrectFile = System.IO.Path.GetFileName(openfile.FileName);
+                GtsCorrectFilePathtextBox.Text = Program.SystemContainer.SysPara.GtsCorrectFilePath;//平台Xml校准文件路径
+            }
+        }
+        /// <summary>
+        /// 应用平台校准文件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ApplyGtsCorrectFilebutton_Click(object sender, EventArgs e)
+        {
+            if (Program.SystemContainer.GTS_Fun.Load_Affinity_MatrixBySpecificfile(Program.SystemContainer.SysPara.GtsCorrectFilePath))
+                MessageBox.Show("平台校准文件加载完成！！！");
+            else
+                MessageBox.Show("平台校准文件加载失败！！！");
+        }
+        /// <summary>
+        /// 选择振镜坐标系校准文件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SelectRtcCorrectFilebutton_Click(object sender, EventArgs e)
+        {
+            // 获取文件名       
+            OpenFileDialog openfile = new OpenFileDialog
+            {
+                Filter = "xml 文件(*.xml)|*.xml"
+            };
+            if (openfile.ShowDialog() == DialogResult.OK)
+            {
+                Program.SystemContainer.SysPara.RtcXmlCorrectFilePath = openfile.FileName;
+                Program.SystemContainer.SysPara.RtcXmlCorrectFile = System.IO.Path.GetFileName(openfile.FileName);
+                RtcXmlCorrectFilePathtextBox.Text = Program.SystemContainer.SysPara.RtcXmlCorrectFilePath;
+            }
+        }
+        /// <summary>
+        /// 应用振镜坐标系矫正文件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ApplyRtcCorrectFilebutton_Click(object sender, EventArgs e)
+        {
+            if (Program.SystemContainer.RTC_Fun.Load_Affinity_MatrixBySpecificfile(Program.SystemContainer.SysPara.RtcXmlCorrectFilePath))
+                MessageBox.Show("振镜Xml校准文件加载完成！！！");
+            else
+                MessageBox.Show("振镜Xml校准文件加载失败！！！");
         }
     }
 }

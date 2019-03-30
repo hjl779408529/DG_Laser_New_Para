@@ -8,6 +8,8 @@ using System.Windows.Forms;
 
 namespace DG_Laser
 {
+    public delegate void NormalMethods();
+    public delegate void AdminMethods();
     /// <summary>
     /// 用户登录页面
     /// </summary>
@@ -16,6 +18,9 @@ namespace DG_Laser
         string[] UserList = null;
         static public string usmen;//用户名，用于保存
         static public string uspass;//密码，用于保存  
+        public event NormalMethods NormalMethodsInject;//设置值大于当前值触发事件
+        public event AdminMethods AdminMethodsInject;//设置值小于当前值触发事件  
+        public event LogInfo Logininfo; 
         /// <summary>
         /// 登录页面初始化
         /// </summary>
@@ -28,6 +33,10 @@ namespace DG_Laser
                 this.tabFormControl.SelectedPage = this.tabFormControl.Pages.Where(p => p.Name == "LoginFormPage").ToArray()[0]; //跳转到登录页面
             }
             FirstSign = true;
+            //注册事件
+            NormalMethodsInject += new NormalMethods(MethodsListNormalInject);
+            AdminMethodsInject += new AdminMethods(MethodsListAdminInject);
+            Logininfo += new LogInfo(appendInfo);
         }
 
         /// <summary>
@@ -79,6 +88,15 @@ namespace DG_Laser
                 Password_Input.Text = "";
                 this.tabFormControl.SelectedPage = this.tabFormControl.Pages.Where(p => p.Name == "workFormPage").ToArray()[0];//跳转到主页
                 //MessageBox.Show("登录成功！");
+                Logininfo?.Invoke(string.Format("{0}登陆成功！！", usmen));
+                if (usmen == "管理员")
+                {
+                    AdminMethodsInject?.Invoke();
+                }
+                else
+                {
+                    NormalMethodsInject?.Invoke();
+                }
             }
             else
             {

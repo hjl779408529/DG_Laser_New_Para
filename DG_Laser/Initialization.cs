@@ -37,18 +37,16 @@ namespace DG_Laser
         //定义相机
         public Basler_Net_Cam BaslerCamera;
         //定义刀具列表
-        public List<Tech_Parameter> Drill_Scissor = new List<Tech_Parameter>();
-        public List<Tech_Parameter> Line_Scissor = new List<Tech_Parameter>();
-        public List<Tech_Parameter> Arc_Scissor = new List<Tech_Parameter>();
-        //定义重复列表
-        public List<Repeat_Parameter> Repeat_Drill_Scissor = new List<Repeat_Parameter>();
-        public List<Repeat_Parameter> Repeat_Line_Scissor = new List<Repeat_Parameter>();
-        public List<Repeat_Parameter> Repeat_Arc_Scissor = new List<Repeat_Parameter>();
+        public List<Tech_Parameter> ScissorList = new List<Tech_Parameter>();
         //运动控制卡IO监视
         System.Timers.Timer GtsIORefreshTimer = new System.Timers.Timer(20);//10ms刷新一次
         //标志反转刷新 
         System.Timers.Timer RefreshTimer1s = new System.Timers.Timer(900);//1s刷新一次
-
+        //物料清单
+        public List<MaterialStorage> MaterialStorageList = new List<MaterialStorage>();//物料库
+        //物料管理窗口
+        public MaterialStorageForm MSForm;
+        public CameraConfigForm CamConfigForm;
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -88,7 +86,7 @@ namespace DG_Laser
             //复位
             RTC_Fun.Reset(SysPara.RtcAutoDelayCorrect);
             //读取校准参数
-            RTC_Fun.Load_Affinity_Matrix();
+            if (SysPara.RtcCorrectType == 1) RTC_Fun.Load_Affinity_Matrix();//仿射矩阵校准模式
         }
         //公共初始化内容
         //文件目录指定  配置文件夹所在目录
@@ -172,31 +170,32 @@ namespace DG_Laser
         /// </summary>
         public void Tcp_Initial()
         {
-            //if (Process_Operate.StartApp("CellLocation"))//打开相机
-            //{
-            //    Thread.Sleep(2000);
-                T_Client.TCP_Start(SysPara.Server_Ip, SysPara.Server_Port);
-            //}
-            //else
-            //{
-            //    Log.Info("相机打开失败!!!");
-            //}   
+            //绑定日志事件
             T_Client.LogErr += Log.WriteError;
             T_Client.LogInfo += Log.Info;
+            //打开相机
+            if (SysPara.CamEn)
+            {
+                if (Process_Operate.StartApp("CellLocation"))//打开相机
+                {
+                    Thread.Sleep(2000);
+                    T_Client.TCP_Start(SysPara.Server_Ip, SysPara.Server_Port);
+                }
+                else
+                {
+                    Log.Info("相机打开失败!!!");
+                }
+            }
         }
         /// <summary>
         /// 加载刀具参数
         /// </summary>
         public bool Load_Scissor_Para()
         {
-            string File_Path1 = @"./\Config/" + "Scissor_Parameter/Drill_Para.csv";
-            string File_Path2 = @"./\Config/" + "Scissor_Parameter/Line_Para.csv";
-            string File_Path3 = @"./\Config/" + "Scissor_Parameter/Arc_Para.csv";
-            if (File.Exists(File_Path1) && File.Exists(File_Path2) && File.Exists(File_Path3))
+            string File_Path = @"./\Config/" + "Scissor_Parameter/ScissorList.csv";
+            if (File.Exists(File_Path))
             {
-                Drill_Scissor = Common_Collect.DtToList<Tech_Parameter>.ConvertToModel(CSV_RW.OpenCSV(File_Path1));//钻孔刀具参数 读取
-                Line_Scissor = Common_Collect.DtToList<Tech_Parameter>.ConvertToModel(CSV_RW.OpenCSV(File_Path2));//线段刀具参数 读取
-                Arc_Scissor = Common_Collect.DtToList<Tech_Parameter>.ConvertToModel(CSV_RW.OpenCSV(File_Path3));//圆弧刀具参数 读取
+                ScissorList = Common_Collect.DtToList<Tech_Parameter>.ConvertToModel(CSV_RW.OpenCSV(File_Path));//刀具参数 读取
                 return true;
             }
             else
@@ -208,54 +207,33 @@ namespace DG_Laser
         /// <summary>
         /// 保存刀具参数
         /// </summary>
-        public void Save_Scissor_Para() 
+        public void Save_Scissor_Para()
         {
-            CSV_RW.SaveCSV_NoDate(Common_Collect.ListToDt<Tech_Parameter>(Drill_Scissor), "Scissor_Parameter/Drill_Para.csv");//钻孔刀具参数 保存
-            CSV_RW.SaveCSV_NoDate(Common_Collect.ListToDt<Tech_Parameter>(Line_Scissor), "Scissor_Parameter/Line_Para.csv");//线段刀具参数 保存
-            CSV_RW.SaveCSV_NoDate(Common_Collect.ListToDt<Tech_Parameter>(Arc_Scissor), "Scissor_Parameter/Arc_Para.csv");//圆弧刀具参数 保存
+            CSV_RW.SaveCSV_NoDate(Common_Collect.ListToDt<Tech_Parameter>(ScissorList), "Scissor_Parameter/ScissorList.csv");//刀具参数 保存
         }
         /// <summary>
-        ///// 加载重复加工参数
+        /// 加载物料库
         /// </summary>
-        public bool Load_Repeat_Para()
+        public bool Load_Material_Storage()
         {
-            string File_Name1 = "Scissor_Parameter/Repeat_Drill_Para.xml";
-            string File_Name2 = "Scissor_Parameter/Repeat_Line_Para.xml";
-            string File_Name3 = "Scissor_Parameter/Repeat_Arc_Para.xml";
-            string File_Path1 = @"./\Config/" + File_Name1;
-            string File_Path2 = @"./\Config/" + File_Name2;
-            string File_Path3 = @"./\Config/" + File_Name3;
-            if (File.Exists(File_Path1) && File.Exists(File_Path2) && File.Exists(File_Path3))
+            string File_Path = @"./\Config/" + "Material/Material.xml";
+            if (File.Exists(File_Path))
             {
-                Repeat_Drill_Scissor = Common_Collect.Reserialize<Repeat_Parameter>(File_Name1);//钻孔线型重复加工参数 读取
-                Repeat_Line_Scissor = Common_Collect.Reserialize<Repeat_Parameter>(File_Name2);//线段线型重复加工参数 读取
-                Repeat_Arc_Scissor = Common_Collect.Reserialize<Repeat_Parameter>(File_Name3);//圆弧线型重复加工参数 读取
+                MaterialStorageList =OperatePara.LoadXml<List<MaterialStorage>>.LoadPara("Material/Material");//材料库读取
                 return true;
             }
             else
             {
-                Repeat_Parameter Tmp_Parameter = new Repeat_Parameter();
-                List<Repeat_Parameter> Tmp_Parameter_List = new List<Repeat_Parameter>();
-                for (int i = 0;i < Tmp_Parameter.Repeat.Length;i++)
-                {
-                    Tmp_Parameter.Repeat[i] = (byte)i;
-                }
-                Tmp_Parameter_List.Add(new Repeat_Parameter(Tmp_Parameter));
-                Repeat_Drill_Scissor = new List<Repeat_Parameter>(Tmp_Parameter_List);//钻孔线型重复加工参数 读取
-                Repeat_Line_Scissor = new List<Repeat_Parameter>(Tmp_Parameter_List);//线段线型重复加工参数 读取
-                Repeat_Arc_Scissor = new List<Repeat_Parameter>(Tmp_Parameter_List);//圆弧线型重复加工参数 读取
                 return false;
             }
 
         }
         /// <summary>
-        /// 保存重复加工参数
+        /// 保存材料库
         /// </summary>
-        public void Save_Repeat_Para()
+        public void Save_Material_Storage()  
         {
-            Common_Collect.Serialize<Repeat_Parameter>(Repeat_Drill_Scissor, "Scissor_Parameter/Repeat_Drill_Para.xml");//钻孔线型重复加工参数 保存
-            Common_Collect.Serialize<Repeat_Parameter>(Repeat_Line_Scissor, "Scissor_Parameter/Repeat_Line_Para.xml");//线段线型重复加工参数 保存
-            Common_Collect.Serialize<Repeat_Parameter>(Repeat_Arc_Scissor, "Scissor_Parameter/Repeat_Arc_Para.xml");//圆弧线型重复加工参数 保存
+            OperatePara.SaveXml<List<MaterialStorage>>("Material/Material", MaterialStorageList);            
         }
         /// <summary>
         /// 启动Timer

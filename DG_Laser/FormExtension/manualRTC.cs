@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -17,6 +18,7 @@ namespace DG_Laser
         decimal Distence_Y = 20;
         decimal Abs_X = 20;
         decimal Abs_Y = 20;
+        bool RTCMannualFlag = false;
         //定义移动方式
         UInt16 Control_Type = 4;//4-jump,6-mark
         /// <summary>
@@ -24,22 +26,72 @@ namespace DG_Laser
         /// </summary>
         private void manualRTCInitial()
         {
-            MoveX.Text = Convert.ToString(Distence_X);
-            MoveY.Text = Convert.ToString(Distence_Y);
-            RtcHomeX.Text = Convert.ToString(Program.SystemContainer.SysPara.Rtc_Home.X);
-            RtcHomeY.Text = Convert.ToString(Program.SystemContainer.SysPara.Rtc_Home.Y);
-            ABSPosX.Text = Convert.ToString(Abs_X);
-            ABSPosY.Text = Convert.ToString(Abs_Y);
-            RtcPosReference.Text = Convert.ToString(Program.SystemContainer.SysPara.Rtc_Pos_Reference);
-            Mark_Speed.Text = Program.SystemContainer.SysPara.Mark_Speed.ToString();
-            Jump_Speed.Text = Program.SystemContainer.SysPara.Jump_Speed.ToString();
-            Laser_ON_Delay.Text = Program.SystemContainer.SysPara.Laser_On_Delay.ToString();
-            Laser_Off_Delay.Text = Program.SystemContainer.SysPara.Laser_Off_Delay.ToString();
-            Jump_Delay.Text = Program.SystemContainer.SysPara.Jump_Delay.ToString();
-            Mark_Delay.Text = Program.SystemContainer.SysPara.Mark_Delay.ToString();
-            Polygon_Delay.Text = Program.SystemContainer.SysPara.Polygon_Delay.ToString();
+            RefreshRtcPara();//更新RTC页面参数
+            //绑定事件
+            RtcHomeXnumericUpDown.ValueChanged += UpdateRtcPara;
+            RtcHomeYnumericUpDown.ValueChanged += UpdateRtcPara;
+            ABSPosYnumericUpDown.ValueChanged += UpdateRtcPara;
+            ABSPosXnumericUpDown.ValueChanged += UpdateRtcPara;
+            MoveXnumericUpDown.ValueChanged += UpdateRtcPara;
+            MoveYnumericUpDown.ValueChanged += UpdateRtcPara;
+            Mark_SpeednumericUpDown.ValueChanged += UpdateRtcPara;
+            Jump_SpeednumericUpDown.ValueChanged += UpdateRtcPara;
+            Laser_ON_DelaynumericUpDown.ValueChanged += UpdateRtcPara;
+            Laser_Off_DelaynumericUpDown.ValueChanged += UpdateRtcPara;
+            Jump_DelaynumericUpDown.ValueChanged += UpdateRtcPara;
+            Mark_DelaynumericUpDown.ValueChanged += UpdateRtcPara;
+            Polygon_DelaynumericUpDown.ValueChanged += UpdateRtcPara;
+            RtcPosReferencenumericUpDown.ValueChanged += UpdateRtcPara;
+        }
+        /// <summary>
+        /// 更新RTC页面参数
+        /// </summary>
+        private void RefreshRtcPara()
+        {
+            RTCMannualFlag = true;
+            Thread.Sleep(30);
+            RtcHomeXnumericUpDown.Value = Program.SystemContainer.SysPara.Rtc_Home.X;
+            RtcHomeYnumericUpDown.Value = Program.SystemContainer.SysPara.Rtc_Home.Y;
+            ABSPosYnumericUpDown.Value = Abs_X;
+            ABSPosXnumericUpDown.Value = Abs_Y;
+            MoveXnumericUpDown.Value = Distence_X;
+            MoveYnumericUpDown.Value = Distence_Y;
+            Mark_SpeednumericUpDown.Value = (decimal)Program.SystemContainer.SysPara.Mark_Speed;
+            Jump_SpeednumericUpDown.Value = (decimal)Program.SystemContainer.SysPara.Jump_Speed;
+            Laser_ON_DelaynumericUpDown.Value = Program.SystemContainer.SysPara.Laser_On_Delay;
+            Laser_Off_DelaynumericUpDown.Value = Program.SystemContainer.SysPara.Laser_Off_Delay;
+            Jump_DelaynumericUpDown.Value = Program.SystemContainer.SysPara.Jump_Delay;
+            Mark_DelaynumericUpDown.Value = Program.SystemContainer.SysPara.Mark_Delay;
+            Polygon_DelaynumericUpDown.Value = Program.SystemContainer.SysPara.Polygon_Delay;
+            RtcPosReferencenumericUpDown.Value = Program.SystemContainer.SysPara.Rtc_Pos_Reference;
+            Txt_RtcFilename.Text = Program.SystemContainer.SysPara.RtcCt5CorrectFilePath;//振镜矫正文件目录
             RefreshAutoDelaySwitch();//刷新自动校正按钮文本
             refreshMode();
+            Thread.Sleep(30);
+            RTCMannualFlag = false;
+        }
+        /// <summary>
+        /// 保存修改数据
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void UpdateRtcPara(object sender, EventArgs e)
+        {
+            if (RTCMannualFlag) return;
+            Program.SystemContainer.SysPara.Rtc_Home.X = RtcHomeXnumericUpDown.Value;
+            Program.SystemContainer.SysPara.Rtc_Home.Y = RtcHomeYnumericUpDown.Value;
+            Abs_X = ABSPosYnumericUpDown.Value;
+            Abs_Y = ABSPosXnumericUpDown.Value;
+            Distence_X = MoveXnumericUpDown.Value;
+            Distence_Y = MoveYnumericUpDown.Value;
+            Program.SystemContainer.SysPara.Mark_Speed = (double)Mark_SpeednumericUpDown.Value;
+            Program.SystemContainer.SysPara.Jump_Speed = (double)Jump_SpeednumericUpDown.Value;
+            Program.SystemContainer.SysPara.Laser_On_Delay = Laser_ON_DelaynumericUpDown.Value;
+            Program.SystemContainer.SysPara.Laser_Off_Delay = Laser_Off_DelaynumericUpDown.Value;
+            Program.SystemContainer.SysPara.Jump_Delay = Jump_DelaynumericUpDown.Value;
+            Program.SystemContainer.SysPara.Mark_Delay = Mark_DelaynumericUpDown.Value;
+            Program.SystemContainer.SysPara.Polygon_Delay = Polygon_DelaynumericUpDown.Value;
+            Program.SystemContainer.SysPara.Rtc_Pos_Reference = RtcPosReferencenumericUpDown.Value;
         }
         /// <summary>
         /// 定位Home
@@ -192,199 +244,39 @@ namespace DG_Laser
             Program.SystemContainer.RTC_Fun.Load_Correct_File(Program.SystemContainer.SysPara.RtcAutoDelayCorrect);
         }
         /// <summary>
-        /// HomeX
+        /// 选择振镜校准文件
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void RtcHomeX_TextChanged(object sender, EventArgs e)
+        private void Btn_Rtc_openFile_Click(object sender, EventArgs e)
         {
-            if (!decimal.TryParse(RtcHomeX.Text, out decimal tmp))
+            // 获取文件名       
+            OpenFileDialog openfile = new OpenFileDialog
             {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Rtc_Home = new Vector(tmp, Program.SystemContainer.SysPara.Rtc_Home.Y);
-        }
-        /// <summary>
-        /// HomeY
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-
-        private void RtcHomeY_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(RtcHomeY.Text, out decimal tmp))
+                Filter = "ct5 文件(*.ct5)|*.ct5"
+            };
+            if (openfile.ShowDialog() == DialogResult.OK)
             {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Rtc_Home = new Vector(Program.SystemContainer.SysPara.Rtc_Home.X,tmp);
-        }
-
-        /// <summary>
-        /// AbsX
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ABSPosX_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(ABSPosX.Text, out Abs_X))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
+                Program.SystemContainer.SysPara.RtcCt5CorrectFilePath = openfile.FileName;
+                Program.SystemContainer.SysPara.RtcCt5CorrectFile = System.IO.Path.GetFileName(openfile.FileName);
+                Txt_RtcFilename.Text = Program.SystemContainer.SysPara.RtcCt5CorrectFilePath;
             }
         }
         /// <summary>
-        /// AbsY
+        /// 振镜校准文件生效
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ABSPosY_TextChanged(object sender, EventArgs e)
+        private void Btn_Rtc_Use_Click(object sender, EventArgs e)
         {
-            if (!decimal.TryParse(ABSPosY.Text, out Abs_Y))
+            if (Program.SystemContainer.RTC_Fun.Load_CorrectFile(Program.SystemContainer.SysPara.RtcCt5CorrectFilePath))
             {
-                MessageBox.Show("请正确输入数字");
-                return;
+                MessageBox.Show("振镜校准文件加载成功！！！");
             }
-        }
-        /// <summary>
-        /// MoveX
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void MoveX_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(MoveX.Text, out Distence_X))
+            else
             {
-                MessageBox.Show("请正确输入数字");
-                return;
+                MessageBox.Show("振镜校准文件加载失败！！！");
             }
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void MoveY_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(MoveY.Text, out Distence_Y))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-        }
-        /// <summary>
-        /// Mark_Speed
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Mark_Speed_TextChanged(object sender, EventArgs e)
-        {
-            if (!double.TryParse(Mark_Speed.Text, out double tem))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Mark_Speed = tem;
-        }
-        /// <summary>
-        /// Laser_ON_Delay
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Laser_ON_Delay_TextChanged(object sender, EventArgs e)
-        {
-            if (!int.TryParse(Laser_ON_Delay.Text, out int tem))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Laser_On_Delay = tem;
-        }
-        /// <summary>
-        /// Laser_Off_Delay
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Laser_Off_Delay_TextChanged(object sender, EventArgs e)
-        {
-            if (!uint.TryParse(Laser_Off_Delay.Text, out uint tem))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Laser_Off_Delay = tem;
-        }
-        /// <summary>
-        /// Polygon_Delay
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Polygon_Delay_TextChanged(object sender, EventArgs e)
-        {
-            if (!uint.TryParse(Polygon_Delay.Text, out uint tem))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Polygon_Delay = tem;
-        }
-        /// <summary>
-        /// Jump_Speed
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Jump_Speed_TextChanged(object sender, EventArgs e)
-        {
-            if (!double.TryParse(Jump_Speed.Text, out double tem))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Jump_Speed = tem;
-        }
-        /// <summary>
-        /// Jump_Delay
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-
-        private void Jump_Delay_TextChanged(object sender, EventArgs e)
-        {
-            if (!uint.TryParse(Jump_Delay.Text, out uint tem))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Jump_Delay = tem;
-        }
-        /// <summary>
-        /// Mark_Delay
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Mark_Delay_TextChanged(object sender, EventArgs e)
-        {
-            if (!uint.TryParse(Mark_Delay.Text, out uint tem))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Mark_Delay = tem;
-        }
-        /// <summary>
-        /// RtcPosReference
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void RtcPosReference_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(RtcPosReference.Text, out decimal tem))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Rtc_Pos_Reference = tem;
         }
     }
 }

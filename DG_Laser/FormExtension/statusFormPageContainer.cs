@@ -53,6 +53,12 @@ namespace DG_Laser
                 if (Program.SystemContainer.IO.EXO8) { EXO8_Status.BackColor = Color.Green; } else { EXO8_Status.BackColor = SystemColors.Control; }//照明灯
                 if (Program.SystemContainer.IO.EXO9) { EXO9_Status.BackColor = Color.Green; } else { EXO9_Status.BackColor = SystemColors.Control; }//启动按钮1灯
                 if (Program.SystemContainer.IO.EXO10) { EXO10_Status.BackColor = Color.Green; } else { EXO10_Status.BackColor = SystemColors.Control; }//启动按钮2灯
+                if (Program.SystemContainer.IO.EXO11) { EXO11_Status.BackColor = Color.Green; } else { EXO11_Status.BackColor = SystemColors.Control; }//X轴回零触发
+                if (Program.SystemContainer.IO.EXO12) { EXO12_Status.BackColor = Color.Green; } else { EXO12_Status.BackColor = SystemColors.Control; }//Y轴回零触发
+                if (Program.SystemContainer.IO.EXO13) { EXO13_Status.BackColor = Color.Green; } else { EXO13_Status.BackColor = SystemColors.Control; }//红色激光开
+                if (Program.SystemContainer.IO.Axis01_Err_Occur) { AxisXErrbutton.BackColor = Color.Red; } else { AxisXErrbutton.BackColor = SystemColors.Control; }//X轴故障
+                if (Program.SystemContainer.IO.Axis02_Err_Occur) { AxisYErrbutton.BackColor = Color.Red; } else { AxisYErrbutton.BackColor = SystemColors.Control; }//Y轴故障
+                if (Program.SystemContainer.IO.GlobalAlarm) { GlobalErrbutton.BackColor = Color.Red; } else { GlobalErrbutton.BackColor = SystemColors.Control; }//全局故障
             });
         }
     }

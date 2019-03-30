@@ -307,161 +307,282 @@ namespace DG_Laser
     [Serializable]
     public class Tech_Parameter
     {
-        //私有属性 
-        private Int16 scissors_type;//scissors_type-刀具类型，repeat-重复次数
-        private decimal pec, prf;//watt-功率，frequence-频率
-        private double jump_speed, mark_speed; //jump_speed- 跳转速度，mark_speed- 打标速度
-        private decimal laser_on_delay;//laser_on_delay - 开光延时
-        private decimal laser_off_delay;//laser_off_delay - 关光延时
-        private decimal jump_delay, mark_delay, polygon_delay;//jump_delay- 跳转延时，mark_delay-打标延时，polygon_delay- 折线延时
-        private int cutter_type;
-        private decimal cutter_radius;
-
         //共有属性
-        public Int16 Scissors_Type
-        {
-            get { return scissors_type; }
-            set { scissors_type = value; }
-        }
-        public decimal PEC
-        {
-            get { return pec; }
-            set { pec = value; }
-        }
-        public decimal PRF
-        {
-            get { return prf; }
-            set { prf = value; }
-        }
-        public double Jump_Speed
-        {
-            get { return jump_speed; }
-            set { jump_speed = value; }
-        }
-        public double Mark_Speed
-        {
-            get { return mark_speed; }
-            set { mark_speed = value; }
-        }
-        public decimal Laser_On_Delay
-        {
-            get { return laser_on_delay; }
-            set { laser_on_delay = value; }
-        }
-        public decimal Laser_Off_Delay
-        {
-            get { return laser_off_delay; }
-            set { laser_off_delay = value; }
-        }
-        public decimal Jump_Delay
-        {
-            get { return jump_delay; }
-            set { jump_delay = value; }
-        }
-        public decimal Mark_Delay
-        {
-            get { return mark_delay; }
-            set { mark_delay = value; }
-        }
-        public decimal Polygon_Delay
-        {
-            get { return polygon_delay; }
-            set { polygon_delay = value; }
-        }
-        public int Cutter_Type
-        {
-            get { return cutter_type; }
-            set { cutter_type = value; }
-        }
-        public decimal Cutter_Radius
-        {
-            get { return cutter_radius; }
-            set { cutter_radius = value; }
-        }
+        /// <summary>
+        /// 刀具名称
+        /// </summary>
+        public string Scissors_Name { get; set; }
+        /// <summary>
+        /// 重复次数
+        /// </summary>
+        public int RepeatTime { get; set; }
+        /// <summary>
+        /// 聚焦偏移
+        /// </summary>
+        public decimal FocusOffSet { get; set; }
+        /// <summary>
+        /// 焦距补偿值
+        /// </summary>
+        public decimal FocusCompensation { get; set; }
+        /// <summary>
+        /// 焦距补偿次数间隔
+        /// </summary>
+        public int FocusCompensationTimes { get; set; }
+        /// <summary>
+        /// 停顿延时值
+        /// </summary>
+        public int DelayCompensation { get; set; }
+        /// <summary>
+        /// 焦距补偿次数间隔
+        /// </summary>
+        public int DelayCompensationTimes { get; set; }
+        /// <summary>
+        /// 是否开吹气
+        /// </summary>
+        public bool Blow { get; set; }
+
+        /// <summary>
+        /// 刀具编号
+        /// </summary>
+        public Int16 Scissors_Type { get; set; }
+        /// <summary>
+        /// 功率百分比
+        /// </summary>
+        public decimal PEC { get; set; }
+        /// <summary>
+        /// 激光频率
+        /// </summary>
+        public decimal PRF { get; set; }
+        /// <summary>
+        /// 跳转速度
+        /// </summary>
+        public double Jump_Speed { get; set; }
+        /// <summary>
+        /// 标刻速度
+        /// </summary>
+        public double Mark_Speed { get; set; }
+        /// <summary>
+        /// 开光延时
+        /// </summary>
+        public decimal Laser_On_Delay { get; set; }
+        /// <summary>
+        /// 关光延时
+        /// </summary>
+        public decimal Laser_Off_Delay { get; set; }
+        /// <summary>
+        /// 跳转延时
+        /// </summary>
+        public decimal Jump_Delay { get; set; }
+        /// <summary>
+        /// 标刻延时
+        /// </summary>
+        public decimal Mark_Delay { get; set; }
+        /// <summary>
+        /// 转折延时
+        /// </summary>
+        public decimal Polygon_Delay { get; set; }
+        /// <summary>
+        /// 钻孔类型
+        /// </summary>
+        public int Cutter_Type { get; set; }
+        /// <summary>
+        /// 偏移距离
+        /// </summary>
+        public decimal Cutter_Radius { get; set; }
+
         //公开构造函数      
         public Tech_Parameter() { }
         //有参数
-        public Tech_Parameter(Int16 scissors_type, decimal pec, decimal prf, double jump_speed, double mark_speed, decimal laser_on_delay, decimal laser_off_delay, decimal jump_delay, decimal mark_delay, decimal polygon_delay, short cutter_type, decimal cutter_radius)
+        public Tech_Parameter(string scissors_name,int repeattime,decimal focusoffSet,decimal focuscompensation,int focuscompensationtimes, int delaycompensation, int delaycompensationtimes, bool blow,Int16 scissors_type, decimal pec, decimal prf, double jump_speed, double mark_speed, decimal laser_on_delay, decimal laser_off_delay, decimal jump_delay, decimal mark_delay, decimal polygon_delay, short cutter_type, decimal cutter_radius)
         {
-            this.scissors_type = scissors_type;
-            this.pec = pec;
-            this.prf = prf;
-            this.jump_speed = jump_speed;
-            this.mark_speed = mark_speed;
-            this.laser_on_delay = laser_on_delay;
-            this.laser_off_delay = laser_off_delay;
-            this.jump_delay = jump_delay;
-            this.mark_delay = mark_delay;
-            this.polygon_delay = polygon_delay;
-            this.cutter_type = cutter_type;
-            this.cutter_radius = cutter_radius;
+            this.Scissors_Name = scissors_name;
+            this.RepeatTime = repeattime;
+            this.FocusOffSet = focusoffSet;
+            this.FocusCompensation = focuscompensation;
+            this.FocusCompensationTimes = focuscompensationtimes;
+            this.DelayCompensation = delaycompensation;
+            this.DelayCompensationTimes = delaycompensationtimes;
+            this.Blow = blow;
+            this.Scissors_Type = scissors_type;
+            this.PEC = pec;
+            this.PRF = prf;
+            this.Jump_Speed = jump_speed;
+            this.Mark_Speed = mark_speed;
+            this.Laser_On_Delay = laser_on_delay;
+            this.Laser_Off_Delay = laser_off_delay;
+            this.Jump_Delay = jump_delay;
+            this.Mark_Delay = mark_delay;
+            this.Polygon_Delay = polygon_delay;
+            this.Cutter_Type = cutter_type;
+            this.Cutter_Radius = cutter_radius;
         }
         public Tech_Parameter(Tech_Parameter Ini)
         {
-            this.scissors_type = Ini.Scissors_Type;
-            this.pec = Ini.PEC;
-            this.prf = Ini.PRF;
-            this.jump_speed = Ini.Jump_Speed;
-            this.mark_speed = Ini.Mark_Speed;
-            this.laser_on_delay = Ini.Laser_On_Delay;
-            this.laser_off_delay = Ini.Laser_Off_Delay;
-            this.jump_delay = Ini.Jump_Delay;
-            this.mark_delay = Ini.Mark_Delay;
-            this.polygon_delay = Ini.Polygon_Delay;
-            this.cutter_type = Ini.Cutter_Type;
-            this.cutter_radius = Ini.Cutter_Radius;
+            this.Scissors_Name = Ini.Scissors_Name;
+            this.RepeatTime = Ini.RepeatTime;
+            this.FocusOffSet = Ini.FocusOffSet;
+            this.FocusCompensation = Ini.FocusCompensation;
+            this.FocusCompensationTimes = Ini.FocusCompensationTimes;
+            this.DelayCompensation = Ini.DelayCompensation;
+            this.DelayCompensationTimes = Ini.DelayCompensationTimes;
+            this.Blow = Ini.Blow;
+            this.Scissors_Type = Ini.Scissors_Type;
+            this.PEC = Ini.PEC;
+            this.PRF = Ini.PRF;
+            this.Jump_Speed = Ini.Jump_Speed;
+            this.Mark_Speed = Ini.Mark_Speed;
+            this.Laser_On_Delay = Ini.Laser_On_Delay;
+            this.Laser_Off_Delay = Ini.Laser_Off_Delay;
+            this.Jump_Delay = Ini.Jump_Delay;
+            this.Mark_Delay = Ini.Mark_Delay;
+            this.Polygon_Delay = Ini.Polygon_Delay;
+            this.Cutter_Type = Ini.Cutter_Type;
+            this.Cutter_Radius = Ini.Cutter_Radius;
 
         }
         //清空
         public void Empty()
         {
-            this.scissors_type = 0;
-            this.pec = 0;
-            this.prf = 0;
-            this.jump_speed = 0;
-            this.mark_speed = 0;
-            this.laser_on_delay = 0;
-            this.laser_off_delay = 0;
-            this.jump_delay = 0;
-            this.mark_delay = 0;
-            this.polygon_delay = 0;
-            this.cutter_type = 0;
-            this.cutter_radius = 0;
-        }
-    }
-    [Serializable]
-    public class Repeat_Parameter
-    {
-        //私有属性 
-        private byte[] repeat = new byte[Program.SystemContainer.SysPara.Work_Repeat_Limit];//repeat-重复次数
-        //共有属性
-        public byte[] Repeat
-        {
-            get { return repeat; }
-            set { repeat = value; }
-        }
-        //公开构造函数      
-        public Repeat_Parameter() { }
-        //有参数
-        public Repeat_Parameter(Repeat_Parameter ini)
-        {
-            this.repeat = (byte[])ini.repeat.Clone();
+            this.Scissors_Name = "";
+            this.RepeatTime = 0;
+            this.FocusOffSet = 0;
+            this.FocusCompensation = 0;
+            this.FocusCompensationTimes = 0;
+            this.DelayCompensation = 0;
+            this.DelayCompensationTimes = 0;
+            this.Blow = false;
+            this.Scissors_Type = 0;
+            this.PEC = 0;
+            this.PRF = 0;
+            this.Jump_Speed = 0;
+            this.Mark_Speed = 0;
+            this.Laser_On_Delay = 0;
+            this.Laser_Off_Delay = 0;
+            this.Jump_Delay = 0;
+            this.Mark_Delay = 0;
+            this.Polygon_Delay = 0;
+            this.Cutter_Type = 0;
+            this.Cutter_Radius = 0;
         }
         //清空
-        public void Empty()
+        public void Original()
         {
-            for (int i = 0; i < repeat.Length; i++)
-            {
-                repeat[i] = 0;
-            }
+            this.Scissors_Name = "default";
+            this.RepeatTime = 1;
+            this.FocusOffSet = 0;
+            this.FocusCompensation = 0;
+            this.FocusCompensationTimes = 0;
+            this.DelayCompensation = 0;
+            this.DelayCompensationTimes = 0;
+            this.Blow = false;
+            this.PEC = 30;
+            this.PRF = 400;
+            this.Jump_Speed = 500;
+            this.Mark_Speed = 200;
+            this.Laser_On_Delay = 40;
+            this.Laser_Off_Delay = 180;
+            this.Jump_Delay = 600;
+            this.Mark_Delay = 300;
+            this.Polygon_Delay = 5;
+            this.Scissors_Type = 0;
+            this.Cutter_Type = 0;
+            this.Cutter_Radius = 0;
         }
     }
+    
+    /// <summary>
+    /// 状态数据变量
+    /// </summary>
+    public class StatusStruct
+    {
+        /// <summary>
+        /// 激光状态：0 - 主电源关，1 - 运行中，2 - 待机状态
+        /// </summary>
+        public int LaserState { get; set; }
+        /// <summary>
+        /// 平台X坐标
+        /// </summary>
+        public decimal X { get; set; }
+        /// <summary>
+        /// 平台Y坐标
+        /// </summary>
+        public decimal Y { get; set; }
+        /// <summary>
+        /// 平台Z坐标
+        /// </summary>
+        public decimal Z { get; set; }
+        /// <summary>
+        /// 加工进度
+        /// </summary>
+        public int Process { get; set; }
+        /// <summary>
+        /// BeginTime 开始时间
+        /// </summary>
+        public string BeginTime { get; set; }
+        /// <summary>
+        /// EndTime 终止时间
+        /// </summary>
+        public string EndTime { get; set; }
+        /// <summary>
+        /// duration 持续时间
+        /// </summary>
+        public string Duration { get; set; }
+        /// <summary>
+        /// 总片数
+        /// </summary>
+        public int TotalPieces { get; set; }
+        /// <summary>
+        /// 已完成片数
+        /// </summary>
+        public int FinishedPieces { get; set; }
+        /// <summary>
+        /// 当前文档
+        /// </summary>
+        public string FileName { get; set; }
+        /// <summary>
+        /// 当前编号
+        /// </summary>
+        public int Number { get; set; }
+        /// <summary>
+        /// 当前刀具
+        /// </summary>
+        public string ScissorName { get; set; }
+        /// <summary>
+        /// 当前刀具重复总次数
+        /// </summary>
+        public int ScissorTotalRepeat { get; set; }
+        /// <summary>
+        /// 当前刀具已重复次数
+        /// </summary>
+        public int ScissorCurrentRepeat { get; set; }
+        /// <summary>
+        /// 当前功率
+        /// </summary>
+        public decimal LaserPEC { get; set; }
+        /// <summary>
+        /// 当前频率
+        /// </summary>
+        public decimal LaserPRF { get; set; }
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public StatusStruct()
+        {
+
+        }
+
+
+
+    }
+    /// <summary>
+    /// 基础轨迹数据
+    /// </summary>
     public class Entity_Data
     {
         public int Path_Type;//路径类型
         public int Color;//元件颜色，用于划分加工分区 
         public short Type;//插补代号：1-直线插补，2-圆弧插补（圆心描述），3-圆弧插补（半径描述，不可描述整圆）
-        public short Backup;//备用
+        public decimal Angle;//角度
         public decimal Start_x;//插补起点X坐标
         public decimal Start_y;//插补起点Y坐标
         public decimal End_x;//插补终点X坐标
@@ -478,7 +599,8 @@ namespace DG_Laser
         {
             Path_Type = 0;
             Type = 0;//插补代号：1-直线插补，2-圆弧插补（圆心描述），3-圆弧插补（半径描述，不可描述整圆）
-            Backup = 0;//备用
+            this.Color = 0;//元件颜色，用于划分加工分区
+            Angle = 0;//备用
             Start_x = 0m;//插补起点X坐标
             Start_y = 0m;//插补起点Y坐标
             End_x = 0m;//插补终点X坐标
@@ -497,7 +619,7 @@ namespace DG_Laser
             this.Path_Type = Ini.Path_Type;//刀具类型
             this.Color = Ini.Color;//元件颜色，用于划分加工分区 
             this.Type = Ini.Type;//插补代号：1-直线插补，2-圆弧插补（圆心描述），3-圆弧插补（半径描述，不可描述整圆）
-            this.Backup = Ini.Backup;//备用
+            this.Angle = Ini.Angle;//备用
             this.Start_x = Ini.Start_x;//插补起点X坐标
             this.Start_y = Ini.Start_y;//插补起点Y坐标
             this.End_x = Ini.End_x;//插补终点X坐标
@@ -515,7 +637,7 @@ namespace DG_Laser
         {
             Path_Type = 0;
             Type = 0;//插补代号：1-直线插补，2-圆弧插补（圆心描述），3-圆弧插补（半径描述，不可描述整圆）
-            Backup = 0;//备用
+            Angle = 0;//备用
             Start_x = 0m;//插补起点X坐标
             Start_y = 0m;//插补起点Y坐标
             End_x = 0m;//插补终点X坐标
@@ -530,128 +652,279 @@ namespace DG_Laser
             Circle_dir = 0;//圆弧方向：顺时针-0，逆时针-1
         }
     }
-    //Gts插补数据
-    public class Interpolation_Data
+    /// <summary>
+    /// 文件整合数据
+    /// </summary>
+    public class File_Entity_Data
     {
-        public int Path_Type;//路径类型 
-        public short Type;//插补代号：1-直线插补，2-圆弧插补（圆心描述），3-圆弧插补（半径描述，不可描述整圆）
-        public short Lift_flag;//抬刀标志：0-抬刀，等待刀具抬起标志；1-刀具下刀切割标志
-        public short Work;//工作区域选择，10-GTS，20-RTC
-        public decimal Start_x;//插补起点X坐标 保留参数
-        public decimal Start_y;//插补起点Y坐标 保留参数
-        public decimal End_x;//插补终点X坐标
-        public decimal End_y;//插补终点Y坐标
-        public Vector Trail_Center = new Vector(0,0);//封闭图形中心坐标X坐标 
-        public decimal Gts_x;//Gts定位置激光加工中心X坐标
-        public decimal Gts_y;//Gts定位置激光加工中心Y坐标
-        public decimal Rtc_x;//Rtc定位 激光加工起点X坐标
-        public decimal Rtc_y;//Rtc定位 激光加工起点Y坐标
-        public decimal Center_x;//圆心坐标x
-        public decimal Center_y;//圆心坐标y
-        public decimal Center_Start_x;//圆心坐标x-起点坐标x
-        public decimal Center_Start_y;//圆心坐标y-起点坐标y 
-        public decimal Angle;//旋转角度 
-        public decimal Circle_radius;//圆弧半径
-        public short Circle_dir;//圆弧方向：顺时针-0，逆时针-1
-        public Interpolation_Data()
+        /// <summary>
+        /// 文件名
+        /// </summary>
+        public string FileName { get; set; }
+        /// <summary>
+        /// 当前文件Laser分区编号，主要是颜色
+        /// </summary>
+        public List<int> SectionList { get; set; }
+        /// <summary>
+        /// DXF文件Mark信息
+        /// </summary>
+        public List<Vector> DxfMarkInfo = new List<Vector>();
+
+        /// <summary>
+        /// 平台Mark信息
+        /// </summary>
+        public List<Vector> PlatformMarkInfo = new List<Vector>();
+
+        /// <summary>
+        /// 分区数据
+        /// </summary>
+        public List<Integrate_Entity_Data> LayerSectionDatas = new List<Integrate_Entity_Data>();
+
+        /// <summary>
+        /// 分区数据，分区内包含多图层数据
+        /// </summary>
+        public List<SectionDataCollection> SectionDataCollections = new List<SectionDataCollection>();
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public File_Entity_Data()
         {
-            Path_Type = 0;
-            Type = 0;//插补代号：1-直线插补，2-圆弧插补（圆心描述），3-圆弧插补（半径描述，不可描述整圆）
-            Lift_flag = 0;//抬刀标志：0-抬刀，等待刀具抬起标志；1-刀具下刀切割标志
-            Work = 0;//工作区域选择，10-GTS，20-RTC
-            Start_x = 0m;//插补起点X坐标
-            Start_y = 0m;//插补起点Y坐标
-            End_x = 0m;//插补终点X坐标
-            End_y = 0m;//插补终点Y坐标
-            Trail_Center = new Vector(0, 0);//封闭图形中心坐标X坐标 
-            Gts_x = 0m;//Gts定位置激光加工中心X坐标
-            Gts_y = 0m;//Gts定位置激光加工中心Y坐标
-            Rtc_x = 0m;//Rtc定位 激光加工起点X坐标
-            Rtc_y = 0m;//Rtc定位 激光加工起点Y坐标
-            Center_x = 0m;//圆心坐标x
-            Center_y = 0m;//圆心坐标y
-            Center_Start_x = 0m;//圆心坐标x-起点坐标x
-            Center_Start_y = 0m;//圆心坐标y-起点坐标y 
-            Angle = 0m;//旋转角度 
-            Circle_radius = 0m;//圆弧半径
-            Circle_dir = 0;//圆弧方向：顺时针-0，逆时针-1
+            this.FileName = "";
+            this.SectionList = new List<int>();
+            this.DxfMarkInfo = new List<Vector>();
+            this.PlatformMarkInfo = new List<Vector>();
+            this.LayerSectionDatas = new List<Integrate_Entity_Data>();
+            this.SectionDataCollections = new List<SectionDataCollection>();
         }
-        public Interpolation_Data(Interpolation_Data Ini)
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public File_Entity_Data(File_Entity_Data Ini)
         {
-            this.Path_Type = Ini.Path_Type;//刀具类型
-            this.Type = Ini.Type;//插补代号：1-直线插补，2-圆弧插补（圆心描述），3-圆弧插补（半径描述，不可描述整圆）
-            this.Lift_flag = Ini.Lift_flag;//抬刀标志：0-抬刀，等待刀具抬起标志；1-刀具下刀切割标志
-            this.Work = Ini.Work;//工作区域选择，10-GTS，20-RTC
-            this.Start_x = Ini.Start_x;//插补起点X坐标 保留参数
-            this.Start_y = Ini.Start_y;//插补起点Y坐标 保留参数
-            this.End_x = Ini.End_x;//插补终点X坐标
-            this.End_y = Ini.End_y;//插补终点Y坐标
-            this.Trail_Center = new Vector(Ini.Trail_Center);//封闭图形中心坐标X坐标 
-            this.Gts_x = Ini.Gts_x;//Gts定位置激光加工中心X坐标
-            this.Gts_y = Ini.Gts_y;//Gts定位置激光加工中心Y坐标
-            this.Rtc_x = Ini.Rtc_x;//Rtc定位 激光加工起点X坐标
-            this.Rtc_y = Ini.Rtc_y;//Rtc定位 激光加工起点Y坐标
-            this.Center_x = Ini.Center_x;//圆心坐标x
-            this.Center_y = Ini.Center_y;//圆心坐标y
-            this.Center_Start_x = Ini.Center_Start_x;//圆心坐标x-起点坐标x
-            this.Center_Start_y = Ini.Center_Start_y;//圆心坐标y-起点坐标y 
-            this.Angle = Ini.Angle;//旋转角度 
-            this.Circle_radius = Ini.Circle_radius;//圆弧半径
-            this.Circle_dir = Ini.Circle_dir;//圆弧方向：顺时针-0，逆时针-1
+            this.FileName = Ini.FileName;
+            this.SectionList = Ini.SectionList;
+            this.DxfMarkInfo = Ini.DxfMarkInfo;
+            this.PlatformMarkInfo = Ini.PlatformMarkInfo;
+            this.LayerSectionDatas = Ini.LayerSectionDatas;
+            this.SectionDataCollections = Ini.SectionDataCollections;
+        }
+        /// <summary>
+        /// 初始化清空
+        /// </summary>
+        public void Empty()
+        {
+            this.FileName = "";
+            this.SectionList = new List<int>();
+            this.DxfMarkInfo = new List<Vector>();
+            this.PlatformMarkInfo = new List<Vector>();
+            this.LayerSectionDatas = new List<Integrate_Entity_Data>();
+            this.SectionDataCollections = new List<SectionDataCollection>();
         }
 
-        public void Empty()
-        {
-            Path_Type = 0;
-            Type = 0;//插补代号：1-直线插补，2-圆弧插补（圆心描述），3-圆弧插补（半径描述，不可描述整圆）
-            Lift_flag = 0;//抬刀标志：0-抬刀，等待刀具抬起标志；1-刀具下刀切割标志
-            Work = 0;//工作区域选择，10-GTS，20-RTC
-            Start_x = 0m;//插补起点X坐标
-            Start_y = 0m;//插补起点Y坐标
-            End_x = 0m;//插补终点X坐标
-            End_y = 0m;//插补终点Y坐标
-            Trail_Center = new Vector(0,0);//封闭图形中心坐标X坐标 
-            Gts_x = 0m;//Gts定位置激光加工中心X坐标
-            Gts_y = 0m;//Gts定位置激光加工中心Y坐标
-            Rtc_x = 0m;//Rtc定位 激光加工起点X坐标
-            Rtc_y = 0m;//Rtc定位 激光加工起点Y坐标
-            Center_x = 0m;//圆心坐标x
-            Center_y = 0m;//圆心坐标y
-            Center_Start_x = 0m;//圆心坐标x-起点坐标x
-            Center_Start_y = 0m;//圆心坐标y-起点坐标y 
-            Angle = 0m;//旋转角度 
-            Circle_radius = 0m;//圆弧半径
-            Circle_dir = 0;//圆弧方向：顺时针-0，逆时针-1
-        }
     }
-    //Rtc振镜单封闭图形数据
-    public class Rtc_Data
+    /// <summary>
+    /// 分区整合元素数组
+    /// </summary>
+    public class Integrate_Entity_Data
     {
-        public short Type;//插补代号：1-直线插补，2-圆弧插补（圆心描述），3-圆弧插补（半径描述，不可描述整圆）
-        public short Lift_flag;//抬刀标志：0-抬刀，等待刀具抬起标志；1-刀具下刀切割标志
-        public short Repeat;//重复加工次数
-        public decimal Start_x;//插补起点X坐标 保留参数
-        public decimal Start_y;//插补起点Y坐标 保留参数
-        public decimal End_x;//终点X坐标
-        public decimal End_y;//终点Y坐标
-        public decimal Center_x;//圆心坐标x
-        public decimal Center_y;//圆心坐标y
-        public decimal Angle;//旋转角度
+        /// <summary>
+        /// 图层名
+        /// </summary>
+        public string LayerName { get; set; }
+
+        /// <summary>
+        /// 分区数据
+        /// </summary>
+        public List<Section_Entity_Data> SectionEntityDatas = new List<Section_Entity_Data>();
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public Integrate_Entity_Data()
+        {
+
+        }
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public Integrate_Entity_Data(Integrate_Entity_Data Ini)
+        {
+            this.LayerName = Ini.LayerName;
+            this.SectionEntityDatas = Ini.SectionEntityDatas;
+        }
+        /// <summary>
+        /// 初始化清空
+        /// </summary>
         public void Empty()
         {
-            Type = 0;//插补代号：1-直线插补，2-圆弧插补（圆心描述），3-圆弧插补（半径描述，不可描述整圆）
-            Lift_flag = 0;//抬刀标志：0-抬刀，等待刀具抬起标志；1-刀具下刀切割标志
-            Repeat = 0;//重复加工次数
-            Start_x = 0m;//插补起点X坐标
-            Start_y = 0m;//插补起点Y坐标
-            End_x = 0m;//插补终点X坐标
-            End_y = 0m;//插补终点Y坐标
-            Center_x = 0m;//圆心坐标x
-            Center_y = 0m;//圆心坐标y
-            Angle = 0m;//旋转角度
+            this.LayerName = "";
+            this.SectionEntityDatas = new List<Section_Entity_Data>();
         }
     }
-    
+    /// <summary>
+    /// 分区数据
+    /// </summary>
+    public class Section_Entity_Data
+    {
+        /// <summary>
+        /// 分区划分
+        /// </summary>
+        public int Color { get; set; }
+        /// <summary>
+        /// 平台基准坐标
+        /// </summary>
+        public Vector Centre = new Vector();
+        /// <summary>
+        /// 实体信息 圆弧和直线
+        /// </summary>
+        public List<List<Entity_Data>> ArcLine = new List<List<Entity_Data>>();
+        /// <summary>
+        /// 实体信息 整圆
+        /// </summary>
+        public List<Entity_Data> Circle = new List<Entity_Data>();
+        /// <summary>
+        /// 实体信息 多段线
+        /// </summary>
+        public List<List<Entity_Data>> LWPolyline = new List<List<Entity_Data>>();
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public Section_Entity_Data()
+        {
+            this.Color = 0;
+            this.Centre = new Vector();
+            this.ArcLine = new List<List<Entity_Data>>();
+            this.Circle = new List<Entity_Data>();
+            this.LWPolyline = new List<List<Entity_Data>>();
+        }
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public Section_Entity_Data(Section_Entity_Data Ini)
+        {
+            this.Color = Ini.Color;
+            this.Centre = Ini.Centre;
+            this.ArcLine = Ini.ArcLine;
+            this.Circle = Ini.Circle;
+            this.LWPolyline = Ini.LWPolyline;
+        }
+        /// <summary>
+        /// 初始化清空
+        /// </summary>
+        public void Empty()
+        {
+            this.Color = 0;
+            this.Centre = new Vector();
+            this.ArcLine = new List<List<Entity_Data>>();
+            this.Circle = new List<Entity_Data>();
+            this.LWPolyline = new List<List<Entity_Data>>();
+        }
+    }
+    /// <summary>
+    /// 分区数据集合
+    /// </summary>
+    public class SectionDataCollection
+    {
+        /// <summary>
+        /// 分区划分
+        /// </summary>
+        public int Color { get; set; }
+        /// <summary>
+        /// 平台基准坐标
+        /// </summary>
+        public Vector Centre = new Vector();
+        /// <summary>
+        /// 分区数据
+        /// </summary>
+        public List<SectionData> SectionDatas = new List<SectionData>();
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public SectionDataCollection()
+        {
+            this.Color = 0;
+            this.Centre = new Vector();
+            this.SectionDatas = new List<SectionData>();
+        }
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public SectionDataCollection(SectionDataCollection Ini)
+        {
+            this.Color = Ini.Color;
+            this.Centre = Ini.Centre;
+            this.SectionDatas = Ini.SectionDatas;
+        }
+        /// <summary>
+        /// 初始化清空
+        /// </summary>
+        public void Empty()
+        {
+            this.Color = 0;
+            this.Centre = new Vector();
+            this.SectionDatas = new List<SectionData>();
+        }
+    }
+    [Serializable]
+    /// <summary>
+    /// 单数据
+    /// </summary>
+    public class SectionData
+    {
+        /// <summary>
+        /// 是否存在数据
+        /// </summary>
+        public bool EN { get; set; }
+        /// <summary>
+        /// 图层名
+        /// </summary>
+        public string LayerName { get; set; }
+        /// <summary>
+        /// 实体信息 圆弧和直线
+        /// </summary>
+        public List<List<Entity_Data>> ArcLine = new List<List<Entity_Data>>();
+        /// <summary>
+        /// 实体信息 整圆
+        /// </summary>
+        public List<Entity_Data> Circle = new List<Entity_Data>();
+        /// <summary>
+        /// 实体信息 多段线
+        /// </summary>
+        public List<List<Entity_Data>> LWPolyline = new List<List<Entity_Data>>();
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public SectionData()
+        {
+            this.EN = false;
+            this.LayerName = "";
+            this.ArcLine = new List<List<Entity_Data>>();
+            this.Circle = new List<Entity_Data>();
+            this.LWPolyline = new List<List<Entity_Data>>();
+        }
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public SectionData(SectionData Ini)
+        {
+            this.EN = Ini.EN;
+            this.LayerName = Ini.LayerName;
+            this.ArcLine = Ini.ArcLine;
+            this.Circle = Ini.Circle;
+            this.LWPolyline = Ini.LWPolyline;
+        }
+        /// <summary>
+        /// 初始化清空
+        /// </summary>
+        public void Empty()
+        {
+            this.EN = false;
+            this.LayerName = "";
+            this.ArcLine = new List<List<Entity_Data>>();
+            this.Circle = new List<Entity_Data>();
+            this.LWPolyline = new List<List<Entity_Data>>();
+        }
+    }
     //Max 和 Min 判断
     [Serializable]
     public class Extreme
@@ -706,29 +979,262 @@ namespace DG_Laser
             this.delta_y = 0;
         }
     }
-    //仿射变换
+    //文件配置
     [Serializable]
-    public class Affinity_Rate
+    public class FileConfig
     {
-        private decimal delta_x;// 
-        private decimal delta_y;//
-        private decimal angle;// 
+        /// <summary>
+        /// DXf文件名
+        /// </summary>
+        public string Name { get; set; }
 
-        public decimal Delta_X { get => delta_x; set => delta_x = value; }
-        public decimal Delta_Y { get => delta_y; set => delta_y = value; }
-        public decimal Angle { get => angle; set => angle = value; }
+        /// <summary>
+        /// DXf路径名
+        /// </summary>
+        public string Path { get; set; }
 
-        public Affinity_Rate(decimal delta_x, decimal delta_y, decimal angle)
+        /// <summary>
+        /// 文件在平台的位置
+        /// </summary>
+        public Vector PlatFormPos { get; set; }
+
+        /// <summary>
+        /// 图层刀具列表
+        /// </summary>
+        public List<LayerScissor> LayerScissor = new List<LayerScissor>();
+        
+        /// <summary>
+        /// 总片数
+        /// </summary>
+        public Int16 TotalPieces { get; set; }
+        /// <summary>
+        /// 起始片数
+        /// </summary>
+        public Int16 StartPieces { get; set; }
+        /// <summary>
+        /// 提醒片数
+        /// </summary>
+        public Int16 AlarmPieces { get; set; }
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public FileConfig()
         {
-            this.delta_x = delta_x;
-            this.delta_y = delta_y;
-            this.angle = angle;
+            this.Name = "";
+            this.Path = "";
+            this.PlatFormPos = new Vector();
+            this.LayerScissor = new List<LayerScissor>();
+            this.TotalPieces = 0;
+            this.StartPieces = 0;
+            this.AlarmPieces = 0;
         }
-        public void Empty()
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="Ini"></param>
+        public FileConfig(FileConfig Ini)
         {
-            this.delta_x = 0;
-            this.delta_y = 0;
-            this.angle = 0;
+            this.Name = Ini.Name;
+            this.Path = Ini.Path;
+            this.PlatFormPos = Ini.PlatFormPos;
+            this.LayerScissor = Ini.LayerScissor;
+            this.TotalPieces = Ini.TotalPieces;
+            this.StartPieces = Ini.StartPieces;
+            this.AlarmPieces = Ini.AlarmPieces;
+        }
+        /// <summary>
+        /// Laser的图层
+        /// </summary>
+        public List<string> LaserLayer
+        {
+            get => this.LayerScissor.Where(o => o.Laser == true).Select(o => o.Layer).ToList();
+        }
+
+    }
+    //图层刀具配置
+    [Serializable]
+    public class LayerScissor
+    {
+        /// <summary>
+        /// 图层列表
+        /// </summary>
+        public string Layer { get; set; }
+        /// <summary>
+        /// 刀具列表
+        /// </summary>
+        public List<string> Scissor = new List<string>();
+        /// <summary>
+        /// 是否激光加工层
+        /// </summary>
+        public bool Laser { get; set; }
+        /// <summary>
+        /// 是否激光加工层
+        /// </summary>
+        public bool Mark { get; set; }
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public LayerScissor()
+        {
+
+        }
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="layer"></param>
+        /// <param name="scissor"></param>
+        public LayerScissor(string layer, List<string> scissor,bool laser,bool mark)
+        {
+            this.Layer = layer;
+            this.Scissor = scissor;
+            this.Laser = laser;
+            this.Mark = mark;
         }
     }
+    //材料库
+    [Serializable]
+    public class MaterialStorage
+    {
+        /// <summary>
+        /// 产品名称
+        /// </summary>
+        public string ProductName { get; set; }
+        /// <summary>
+        /// 材料列表
+        /// </summary>
+        public List<Material> MaterialList { get; set; }
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public MaterialStorage()
+        {
+            this.ProductName = "";
+            this.MaterialList = new List<Material>();
+        }
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="Ini"></param>
+        public MaterialStorage(MaterialStorage Ini) 
+        {
+            this.ProductName = Ini.ProductName;
+            this.MaterialList = Ini.MaterialList;
+        }
+    }
+    [Serializable]
+    public class Material
+    {
+        /// <summary>
+        /// 材料名称
+        /// </summary>
+        public string MaterialName { get; set; }
+        /// <summary>
+        /// 厚度
+        /// </summary>
+        public decimal Thickness { get; set; }
+        /// <summary>
+        /// 总片数
+        /// </summary>
+        public int TotalPieces { get; set; }
+        /// <summary>
+        /// 起始片数
+        /// </summary>
+        public int StartPieces { get; set; }
+        /// <summary>
+        /// 报警片数
+        /// </summary>
+        public int AlarmPieces { get; set; }
+        /// <summary>
+        /// 宽度
+        /// </summary>
+        public decimal Width { get; set; }
+        /// <summary>
+        /// 高度（长度）
+        /// </summary>
+        public decimal Height { get; set; }
+        /// <summary>
+        /// 材料位置 XY坐标
+        /// </summary>
+        public Vector Point { get; set; }
+        /// <summary>
+        /// 材料旋转角度 X-Angle,Y-Angle
+        /// </summary>
+        public Vector Angle { get; set; }
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public Material()
+        {
+            this.MaterialName = "";
+            this.Thickness = 0;
+            this.TotalPieces = 0;
+            this.StartPieces = 0;
+            this.AlarmPieces = 0;
+            this.Width = 0;
+            this.Height = 0;
+            this.Point = new Vector(0, 0);
+            this.Angle = new Vector(0, 0);
+        }
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="Ini"></param>
+        public Material(Material Ini)
+        {
+            this.MaterialName = Ini.MaterialName;
+            this.Thickness = Ini.Thickness;
+            this.TotalPieces = Ini.TotalPieces;
+            this.StartPieces = Ini.StartPieces;
+            this.AlarmPieces = Ini.AlarmPieces;
+            this.Width = Ini.Width;
+            this.Height = Ini.Height;
+            this.Point = Ini.Point;
+            this.Angle = Ini.Angle;
+        }
+
+
+    }
+    //项目配置
+    [Serializable]
+    public class LaserProject
+    {
+        /// <summary>
+        /// 项目名称
+        /// </summary>
+        public string ProjectName { get; set; }
+        /// <summary>
+        /// 产品名称
+        /// </summary>
+        public string ProductName { get; set; }
+        /// <summary>
+        /// 材料名称
+        /// </summary>
+        public string MaterialName { get; set; }
+        /// <summary>
+        /// 包含的文件选择
+        /// </summary>
+        public List<FileConfig> FileList = new List<FileConfig>(); 
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public LaserProject()
+        {
+            this.ProjectName = "";
+            this.ProductName = "";
+            this.MaterialName = "";
+            this.FileList = new List<FileConfig>();
+        }
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="Ini"></param>
+        public LaserProject(LaserProject Ini)
+        {
+            this.ProjectName = Ini.ProjectName;
+            this.ProductName = Ini.ProductName;
+            this.MaterialName = Ini.MaterialName;
+            this.FileList = Ini.FileList;
+        }
+    }
+
 }

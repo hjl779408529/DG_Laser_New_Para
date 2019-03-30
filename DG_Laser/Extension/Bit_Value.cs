@@ -126,7 +126,20 @@ namespace DG_Laser
             var val = 1 << index;
             return (value & val) == val;
         }
-
+        /// <summary>
+        /// 返回byte数据中某一位是否为1
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="index">8位数据的从右向左的偏移位索引(0~7)</param>
+        /// <returns>true表示该位为1，false表示该位为0</returns>
+        public static bool GetBitValue(Int64 value, ushort index)
+        {
+            if (index > 63) throw new ArgumentOutOfRangeException("index"); //索引出错
+            Int64 val = 1 << index;
+            Int64 Tem = value;
+            bool result = (Tem & val) == val;
+            return result;
+        }
         /// <summary>
         /// 设定byte数据中某一位的值
         /// </summary>

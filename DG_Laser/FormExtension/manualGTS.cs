@@ -20,7 +20,7 @@ namespace DG_Laser
         //变量
         //定义Menu_5_Axis_Handle窗口刷新定时器
         System.Timers.Timer Axis_Handle_Timer = new System.Timers.Timer(200);
-
+        public bool GtsManualParaWRFlag = false;
         //定义当前窗口所需变量
         decimal acc = 500m, dcc = 500m, mannualVel = 100m;
         decimal step = 10m;//默认值10mm 
@@ -43,29 +43,78 @@ namespace DG_Laser
             Axis_Handle_Timer.Enabled = true;
             Axis_Handle_Timer.Start();
 #endif
+            
+            RefreshMannualGtsPara();//刷新Gts页面参数值
 
+            //绑定事件
+            //初始化显示
+            AxisSelect.ValueChanged += UpdateMannualGtsPara;
+            //加速度
+            ManualACCnumericUpDown.ValueChanged += UpdateMannualGtsPara;
+            //减速度
+            ManualDCCnumericUpDown.ValueChanged += UpdateMannualGtsPara;
+            //步长
+            ManualStep.ValueChanged += UpdateMannualGtsPara;
+            //手动速度
+            ManualSpeednumericUpDown.ValueChanged += UpdateMannualGtsPara;
+            //原点回归参数
+            //回零速度
+            HomeSpeednumericUpDown.ValueChanged += UpdateMannualGtsPara;
+            //回零加速度
+            HomeACCnumericUpDown.ValueChanged += UpdateMannualGtsPara;
+            //回零减速度
+            HomeDCCnumericUpDown.ValueChanged += UpdateMannualGtsPara;
+            //回零平滑时间
+            HomeSmoothTimenumericUpDown.ValueChanged += UpdateMannualGtsPara;
+            //原点偏移
+            HomeDeviationnumericUpDown.ValueChanged += UpdateMannualGtsPara;
+        }
+        /// <summary>
+        /// 刷新Gts页面参数值
+        /// </summary>
+        private void RefreshMannualGtsPara()
+        {
+            GtsManualParaWRFlag = true;
+            Thread.Sleep(30);
             //初始化显示
             AxisSelect.Value = Axis_No;
             //加速度
-            ManualACC.Text = Convert.ToString(acc);
+            ManualACCnumericUpDown.Value = acc;
             //减速度
-            ManualDCC.Text = Convert.ToString(dcc);
+            ManualDCCnumericUpDown.Value = dcc;
             //步长
-            ManualStep.Text = Convert.ToString(step);//当前1pluse-10um,转化为mm需除以100
+            ManualStep.Value = step;//当前1pluse-10um,转化为mm需除以100
             //手动速度
-            ManualSpeed.Text = Convert.ToString(mannualVel);
-
+            ManualSpeednumericUpDown.Value = mannualVel;
             //原点回归参数
             //回零速度
-            HomeSpeed.Text = Convert.ToString(Program.SystemContainer.SysPara.Home_High_Speed);
+            HomeSpeednumericUpDown.Value = Program.SystemContainer.SysPara.Home_High_Speed;
             //回零加速度
-            HomeACC.Text = Convert.ToString(Program.SystemContainer.SysPara.Home_acc);
+            HomeACCnumericUpDown.Value = Program.SystemContainer.SysPara.Home_acc;
             //回零减速度
-            HomeDCC.Text = Convert.ToString(Program.SystemContainer.SysPara.Home_dcc);
+            HomeDCCnumericUpDown.Value = Program.SystemContainer.SysPara.Home_dcc;
             //回零平滑时间
-            HomeSmoothTime.Text = Convert.ToString(Program.SystemContainer.SysPara.Home_smoothTime);
+            HomeSmoothTimenumericUpDown.Value = Program.SystemContainer.SysPara.Home_smoothTime;
             //原点偏移
-            HomeDeviation.Text = Convert.ToString(Program.SystemContainer.SysPara.Home_OffSet);
+            HomeDeviationnumericUpDown.Value = Program.SystemContainer.SysPara.Home_OffSet;
+            Thread.Sleep(30);
+            GtsManualParaWRFlag = false;
+        }
+        /// <summary>
+        /// 更新Gts页面参数至系统参数
+        /// </summary>
+        private void UpdateMannualGtsPara(object sender, EventArgs e)
+        {
+            Axis_No = Convert.ToInt16(AxisSelect.Value);
+            step = ManualStep.Value;//当前1pluse-10um,转化为mm需除以100
+            acc = ManualACCnumericUpDown.Value;
+            dcc = ManualDCCnumericUpDown.Value;
+            mannualVel = ManualSpeednumericUpDown.Value;
+            Program.SystemContainer.SysPara.Home_High_Speed = HomeSpeednumericUpDown.Value;
+            Program.SystemContainer.SysPara.Home_acc = HomeACCnumericUpDown.Value;
+            Program.SystemContainer.SysPara.Home_dcc = HomeDCCnumericUpDown.Value;
+            Program.SystemContainer.SysPara.Home_smoothTime = (short)HomeSmoothTimenumericUpDown.Value;
+            Program.SystemContainer.SysPara.Home_OffSet = HomeDeviationnumericUpDown.Value;
         }
         /// <summary>
         /// 轴操作页面刷新
@@ -297,15 +346,7 @@ namespace DG_Laser
         /// <param name="e"></param>
         private void AlarmClear_MouseDown(object sender, MouseEventArgs e)
         {
-            if (Axis_No == 1)
-            {
-                Program.SystemContainer.GTS_Fun.AlarmClearON(Axis_No);
-            }
-            else if (Axis_No == 2)
-            {
-                Program.SystemContainer.GTS_Fun.AlarmClearON(Axis_No);
-            }
-
+            Program.SystemContainer.GTS_Fun.AlarmClearON(Axis_No);
         }
         /// <summary>
         /// 轴报警清除 抬起
@@ -314,14 +355,7 @@ namespace DG_Laser
         /// <param name="e"></param>
         private void AlarmClear_MouseUp(object sender, MouseEventArgs e)
         {
-            if (Axis_No == 1)
-            {
-                Program.SystemContainer.GTS_Fun.AlarmClearOFF(Axis_No);
-            }
-            else if (Axis_No == 2)
-            {
-                Program.SystemContainer.GTS_Fun.AlarmClearOFF(Axis_No);
-            }
+            Program.SystemContainer.GTS_Fun.AlarmClearOFF(Axis_No);
         }
         /// <summary>
         /// 伺服使能
@@ -454,141 +488,7 @@ namespace DG_Laser
         {
             Program.SystemContainer.GTS_Fun.EmgStop(Axis_No);
         }
-        /// <summary>
-        /// 切换轴
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void AxisSelect_ValueChanged(object sender, EventArgs e)
-        {
-            Axis_No = Convert.ToInt16(AxisSelect.Value);
-        }
-        /// <summary>
-        /// 手动加速度修正
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ManualACC_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(ManualACC.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            acc = tmp;
-        }
-        /// <summary>
-        /// 手动减速度
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ManualDCC_TextChanged(object sender, EventArgs e)
-        {           
-            if (!decimal.TryParse(ManualDCC.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            dcc = tmp;
-        }
-        /// <summary>
-        /// 步长
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ManualStep_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(ManualStep.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            step = tmp;
-        }
-        /// <summary>
-        /// 手动速度
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ManualSpeed_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(ManualSpeed.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            mannualVel = (tmp);
-        }
-        /// <summary>
-        /// 回零速度
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void HomeSpeed_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(HomeSpeed.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Home_High_Speed = tmp;
-        }
-        /// <summary>
-        /// 回零加速度
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void HomeACC_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(HomeACC.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Home_acc = tmp;
-        }
-        /// <summary>
-        /// 回零减速度
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void HomeDCC_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(HomeDCC.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Home_dcc = tmp;
-          
-        }
-        /// <summary>
-        /// 回零平滑时间
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void HomeSmoothTime_TextChanged(object sender, EventArgs e)
-        {
-            if (!Int16.TryParse(HomeSmoothTime.Text, out Int16 tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Home_smoothTime = tmp;
-        }
-        /// <summary>
-        /// 原点偏移
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void HomeDeviation_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(HomeDeviation.Text, out decimal tmp))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Program.SystemContainer.SysPara.Home_OffSet = tmp;
-        }
+              
+        
     }
 }

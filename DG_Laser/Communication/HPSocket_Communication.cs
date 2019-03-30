@@ -14,6 +14,7 @@ namespace DG_Laser
         public Vector Receive_Cordinate = new Vector();//接收的数据 相机转换为坐标
         bool isSend = false;//发送标志 
         public bool Rec_Ok;//接收完成标志
+        public bool ConnectOk = false;//连接标志 清除
         public event LogErrstring LogErr;
         public event LogInfo LogInfo;
         /// <summary>
@@ -21,6 +22,7 @@ namespace DG_Laser
         /// </summary>
         public HPSocket_Communication()
         {
+            ConnectOk = false;//连接标志 清除
             try
             {
                 // 设置client事件
@@ -79,6 +81,13 @@ namespace DG_Laser
         /// <param name="order"></param>
         public void Send_Data(int order)
         {
+            //检测是否连接
+            if (!ConnectOk)
+            {
+                LogErr?.Invoke("相机未连接，Send命令取消！！！");
+                return;
+            }
+            //发送数据
             try
             {
                 Rec_Ok = false;//清除接收完成标志
@@ -94,7 +103,6 @@ namespace DG_Laser
                 if (client.Send(bytes, bytes.Length))
                 {
                     isSend = true;
-                    //Log.Info("发送成功！！！");
                 }
                 else
                 {
@@ -125,6 +133,7 @@ namespace DG_Laser
         HandleResult OnConnect(TcpClient sender)
         {
             // 已连接 到达一次
+            ConnectOk = true;
             LogInfo?.Invoke(string.Format("服务器连接成功！！！----> [{0},OnConnect]", sender.ConnectionId));
             return HandleResult.Ok;
         }
@@ -153,25 +162,29 @@ namespace DG_Laser
             Array.ConstrainedCopy(bytes, 0, contentBytes, 0, contentBytes.Length);
             string data = Encoding.Default.GetString(contentBytes); 
             string[] tmp = data.Split(',');
+            
             if (isSend)
             {
                 isSend = false;
-                if ((decimal.TryParse(tmp[0], out decimal d_tmp_x)) && (decimal.TryParse(tmp[1], out decimal d_tmp_y)))
-                {
-                    Receive_Cordinate = new Vector(d_tmp_x, d_tmp_y);
-                    Vector Tmp = new Vector(Receive_Cordinate - new Vector(999, 999));
-                    //接收数据
-                    if (Tmp.Length <= 0.01m)
-                    {
-                        Receive_Cordinate = new Vector(0, 0);
-                    }
-                    Rec_Ok = true;                  
-                    //MessageBox.Show(string.Format("(X:{0},Y:{1})", Receive_Cordinate.X, Receive_Cordinate.Y));
+                if (tmp.Length <= 1)
+                {                    
+                    Receive_Cordinate = new Vector(0, 0);
+                    Rec_Ok = true;
+                    LogErr?.Invoke("图像处理反馈 -- 识别失败,数据:" + data);
                 }
                 else
                 {
-                    Rec_Ok = false;
-                    LogErr?.Invoke("相机坐标提取格式失败！！！！");
+                    if ((decimal.TryParse(tmp[0], out decimal d_tmp_x)) && (decimal.TryParse(tmp[1], out decimal d_tmp_y)))
+                    {
+                        Receive_Cordinate = new Vector(d_tmp_x, d_tmp_y);
+                        Rec_Ok = true;
+                    }
+                    else
+                    {
+                        Receive_Cordinate = new Vector(0, 0);
+                        Rec_Ok = true;
+                        LogErr?.Invoke("图像处理数据转换 -- 相机坐标提取失败！！！！");
+                    }
                 }
             }            
             return HandleResult.Ok;
@@ -185,6 +198,7 @@ namespace DG_Laser
         /// <returns></returns>
         HandleResult OnClose(TcpClient sender, SocketOperation enOperation, int errorCode)
         {
+            ConnectOk = false;//连接标志 清除
             if (errorCode == 0)
                 // 连接关闭了
                 LogInfo?.Invoke(string.Format(" > [{0},OnClose]", sender.ConnectionId));
@@ -212,19 +226,25 @@ namespace DG_Laser
         public Vector Get_Cam_Deviation_Coordinate_Correct(int order)
         {
             Vector Result;
+            //检测是否连接
+            if (!ConnectOk)
+            {
+                LogErr?.Invoke("相机未连接！！！");
+                return new Vector(0, 0);
+            }
             //发送指令
             Send_Data(order);
             //等待完成
             Task.Factory.StartNew(() => { do { } while (!Rec_Ok); }).Wait(5 * 1000);//5 * 1000,该时间范围内：代码段完成 或 超出该时间范围 返回并继续向下执行
             //换算数据
-            if (Rec_Ok && !(Receive_Cordinate.Length == 0))
+            if (Rec_Ok && (Receive_Cordinate.Length != 0))
             {
                 Result = new Vector(Get_Coordinate_Corrrect_Point(Receive_Cordinate.X, Receive_Cordinate.Y));
             }
             else
             {
                 Result = new Vector(0, 0);//异常接收退出
-                LogErr?.Invoke("相机图形识别失败！！！");
+                LogErr?.Invoke("坐标系矫正 -- 相机图形识别失败！！！");
             }
             //返回数据
             return Result;
@@ -237,19 +257,25 @@ namespace DG_Laser
         public Vector Get_Cam_Deviation_Pixel_Correct(int order)
         {
             Vector Result;
+            //检测是否连接
+            if (!ConnectOk)
+            {
+                LogErr?.Invoke("相机未连接！！！");
+                return new Vector(0, 0);
+            }
             //发送指令
             Send_Data(order);
             //等待完成
             Task.Factory.StartNew(() => { do { } while (!Rec_Ok); }).Wait(5 * 1000);//5 * 1000,该时间范围内：代码段完成 或 超出该时间范围 返回并继续向下执行
             //换算数据
-            if (Rec_Ok && !(Receive_Cordinate.Length == 0))
+            if (Rec_Ok && (Receive_Cordinate.Length != 0))
             {
                 Result = new Vector(Receive_Cordinate.X * Program.SystemContainer.SysPara.Cam_Reference, Receive_Cordinate.Y * Program.SystemContainer.SysPara.Cam_Reference);
             }
             else
             {
                 Result = new Vector(0, 0);//异常接收退出
-                LogErr?.Invoke("相机图形识别失败！！！");
+                LogErr?.Invoke("像素矫正及计算 -- 相机图形识别失败！！！");
             }
             //返回数据
             return Result;
@@ -262,19 +288,25 @@ namespace DG_Laser
         public Vector Get_Cam_Actual_Pixel(int order)
         {
             Vector Result;
+            //检测是否连接
+            if (!ConnectOk)
+            {
+                LogErr?.Invoke("相机未连接！！！");
+                return new Vector(0, 0);
+            }
             //发送指令
             Send_Data(order);
             //等待完成
             Task.Factory.StartNew(() => { do { } while (!Rec_Ok); }).Wait(5 * 1000);//5 * 1000,该时间范围内：代码段完成 或 超出该时间范围 返回并继续向下执行
             //换算数据
-            if (Rec_Ok && !(Receive_Cordinate.Length == 0))
+            if (Rec_Ok && (Receive_Cordinate.Length != 0))
             {
                 Result = new Vector(Receive_Cordinate.X, Receive_Cordinate.Y);
             }
             else
             {
                 Result = new Vector(0, 0);//异常接收退出
-                LogErr?.Invoke("相机图形识别失败！！！");
+                LogErr?.Invoke("返回实际像素 -- 相机图形识别失败！！！");
             }
             //返回数据
             return new Vector(Result);

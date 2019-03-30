@@ -48,114 +48,14 @@ namespace DG_Laser
                     Cam_Integrate_Fun.Exit_Flag = false;
                     return;
                 }
-
+                //刀具参数生效
+                
                 //执行
-                for (int j = 0; j < Program.SystemContainer.SysPara.Work_Repeat_Times; j++)
-                {
-                    //退出
-                    if (Exit_Flag)
-                    {
-                        Exit_Flag = false;
-                        Cam_Integrate_Fun.Exit_Flag = false;
-                        return;
-                    }
-                    //刀具参数生效
-                    if (Type == 0)//Drill
-                    {
-                        if (Work_Datas[i][0][0].Path_Type < Program.SystemContainer.Repeat_Drill_Scissor.Count)
-                        {
-                            if ((Program.SystemContainer.Repeat_Drill_Scissor[Work_Datas[i][0][0].Path_Type].Repeat[j] > 0) && (Program.SystemContainer.Repeat_Drill_Scissor[Work_Datas[i][0][0].Path_Type].Repeat[j] <= Program.SystemContainer.Drill_Scissor.Count))
-                            {
-                                if (Program.SystemContainer.Drill_Scissor[Program.SystemContainer.Repeat_Drill_Scissor[Work_Datas[i][0][0].Path_Type].Repeat[j] - 1].Mark_Speed != 0)
-                                {
-                                    Program.SystemContainer.RTC_Fun.Scissors_Para_Exe(Program.SystemContainer.Drill_Scissor[Program.SystemContainer.Repeat_Drill_Scissor[Work_Datas[i][0][0].Path_Type].Repeat[j] - 1]);//启用当前重复次数的刀具
-                                }
-                                else
-                                {
-                                    LogInfo?.Invoke(string.Format("Drill{0}刀具MarkSpeed为零，请检查！！！", Program.SystemContainer.Repeat_Drill_Scissor[Work_Datas[i][0][0].Path_Type].Repeat[j]));
-                                    continue;
-                                }
-                            }
-                            else
-                            {
-                                LogInfo?.Invoke("无可用Drill刀具！！！");
-                                continue;
-                            }
-                        }
-                        else
-                        {
-                            LogInfo?.Invoke(string.Format("Dill{0}超出Drill重复参数范围，请检查！！！", Work_Datas[i][0][0].Path_Type));
-                            return;
-                        }
-
-                        
-                    }
-                    else if (Type == 1)//Arc
-                    {
-                        if (Work_Datas[i][0][0].Path_Type < Program.SystemContainer.Repeat_Arc_Scissor.Count)
-                        {
-                            if ((Program.SystemContainer.Repeat_Arc_Scissor[Work_Datas[i][0][0].Path_Type].Repeat[j] > 0) && (Program.SystemContainer.Repeat_Arc_Scissor[Work_Datas[i][0][0].Path_Type].Repeat[j] <= Program.SystemContainer.Arc_Scissor.Count))
-                            {
-                                if (Program.SystemContainer.Arc_Scissor[Program.SystemContainer.Repeat_Arc_Scissor[Work_Datas[i][0][0].Path_Type].Repeat[j] - 1].Mark_Speed != 0)
-                                {
-                                    Program.SystemContainer.RTC_Fun.Scissors_Para_Exe(Program.SystemContainer.Arc_Scissor[Program.SystemContainer.Repeat_Arc_Scissor[Work_Datas[i][0][0].Path_Type].Repeat[j] - 1]);//启用当前重复次数的刀具
-                                }
-                                else
-                                {
-                                    LogInfo?.Invoke(string.Format("Arc{0}刀具MarkSpeed为零，请检查！！！", Program.SystemContainer.Repeat_Arc_Scissor[Work_Datas[i][0][0].Path_Type].Repeat[j]));
-                                    continue;
-                                }
-                            }
-                            else
-                            {
-                                LogInfo?.Invoke("无可用Arc刀具！！！");
-                                continue;
-                            }
-                        }
-                        else
-                        {
-                            LogInfo?.Invoke(string.Format("Arc{0}超出Arc重复参数范围，请检查！！！", Work_Datas[i][0][0].Path_Type));
-                            return;
-                        }
-
-                        
-                    }
-                    else if (Type == 2)//Line
-                    {
-                        if (Work_Datas[i][0][0].Path_Type < Program.SystemContainer.Repeat_Line_Scissor.Count)
-                        {
-                            if ((Program.SystemContainer.Repeat_Line_Scissor[Work_Datas[i][0][0].Path_Type].Repeat[j] > 0) && (Program.SystemContainer.Repeat_Line_Scissor[Work_Datas[i][0][0].Path_Type].Repeat[j] <= Program.SystemContainer.Line_Scissor.Count))
-                            {
-                                if (Program.SystemContainer.Line_Scissor[Program.SystemContainer.Repeat_Line_Scissor[Work_Datas[i][0][0].Path_Type].Repeat[j] - 1].Mark_Speed != 0)
-                                {
-                                    Program.SystemContainer.RTC_Fun.Scissors_Para_Exe(Program.SystemContainer.Line_Scissor[Program.SystemContainer.Repeat_Line_Scissor[Work_Datas[i][0][0].Path_Type].Repeat[j] - 1]);//启用当前重复次数的刀具
-                                }
-                                else
-                                {
-                                    LogInfo?.Invoke(string.Format("Line{0}刀具MarkSpeed为零，请检查！！！", Program.SystemContainer.Repeat_Line_Scissor[Work_Datas[i][0][0].Path_Type].Repeat[j]));
-                                    continue;
-                                }                                
-                            }
-                            else
-                            {
-                                LogInfo?.Invoke("无可用Line刀具！！！");
-                                continue;
-                            }
-                        }
-                        else
-                        {
-                            LogInfo?.Invoke(string.Format("Line{0}超出Line重复参数范围，请检查！！！", Work_Datas[i][0][0].Path_Type));
-                            return;
-                        }                       
-                    }
-
-                    //执行
-                    Cam_Integrate_Fun Cam_Method = new Cam_Integrate_Fun();
-                    var Work_Method = typeof(Cam_Integrate_Fun).GetMethod(methods[method_index]);
-                    object[] paras = new object[] { Work_Datas[i] };
-                    Work_Method.Invoke(Cam_Method, paras);
-
-                }     
+                Cam_Integrate_Fun Cam_Method = new Cam_Integrate_Fun();
+                var Work_Method = typeof(Cam_Integrate_Fun).GetMethod(methods[method_index]);
+                object[] paras = new object[] { Work_Datas[i] };
+                Work_Method.Invoke(Cam_Method, paras);
+   
             }
         }
 

@@ -27,8 +27,9 @@ namespace DG_Laser
             string currentPath = new DirectoryInfo("./").FullName;//获取当前应用程序路径的目录 
             DBName = dbName;
             TBName = tbName;
+
             FilePath = currentPath + path + "//";
-            txtConn = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + FilePath + DBName;
+            txtConn = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + FilePath + DBName + ";Jet OLEDB:Database Password=dg123";
             DBConnection = new OleDbConnection(txtConn);
             UpdateDatable();
             UpdateAdapterCommand();

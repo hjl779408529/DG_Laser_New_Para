@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -10,13 +11,21 @@ namespace DG_Laser
 {
     class IO
     {
-        public bool EXI1, EXI2, EXI3, EXI4, EXI5, EXI6, EXI7; //定义输入变量
-        public bool EXO1, EXO2, EXO3, EXO4, EXO5, EXO6, EXO7, EXO8, EXO9, EXO10, EXO11, EXO12; //定义输出变量
+        public bool EXI1, EXI2, EXI3, EXI4, EXI5, EXI6, EXI7,EXI8, EXI9; //定义输入变量 
+        public bool EXO1, EXO2, EXO3, EXO4, EXO5, EXO6, EXO7, EXO8, EXO9, EXO10, EXO11, EXO12, EXO13, EXO14, EXO15; //定义输出变量
         public bool Axis01_Limit_Up, Axis01_Limit_Down, Axis01_Home, Axis01_Alarm, Axis01_Alarm_Cl, Axis01_MC_Err, Axis01_EN, Axis01_Busy, Axis01_IO_Stop, Axis01_IO_EMG, Axis01_Motor_Posed, Axis01_Upper_Posed;//定义轴1的BOOL变量
         public bool Axis02_Limit_Up, Axis02_Limit_Down, Axis02_Home, Axis02_Alarm, Axis02_Alarm_Cl, Axis02_MC_Err, Axis02_EN, Axis02_Busy, Axis02_IO_Stop, Axis02_IO_EMG, Axis02_Motor_Posed, Axis02_Upper_Posed;//定义轴2的BOOL变量
-        public short Cyc_control, Blow_control, Lamp_control, Yellow_lamp, Green_lamp, Red_lamp, Beeze_Control, Button1_Lamp, Button2_Lamp;//定义气缸、吹气、照明、灯塔黄、灯塔绿、灯塔红、蜂鸣、启动按钮1灯、
+        public short Door_Control,Cyc_control, Blow_control, Lamp_control, Yellow_lamp, Green_lamp, Red_lamp, Beeze_Control, Button1_Lamp, Button2_Lamp, RedLaser_Control;//定义气缸、吹气、照明、灯塔黄、灯塔绿、灯塔红、蜂鸣、启动按钮1灯、
         public short Axis01_Home_Ex0_Control, Axis02_Home_Ex0_Control;//定义轴1、2回零触发
-
+        public bool Axis01_Err_Occur, Axis02_Err_Occur;//轴故障
+        public bool GlobalRunnig,GlobalWarning,GlobalAlarm,GlobalEMG;//全局运行（自动），警告，报警，紧急停止
+        public bool SoftEMG = false;//主页面软急停按钮
+        public SpecifyValueEvent EMGButton = new SpecifyValueEvent();//外部实体急停按钮        
+        public SpecifyValueEvent Start_Button = new SpecifyValueEvent();//外部双启 实体按钮
+        public SpecifyValueEvent Shield_Beep = new SpecifyValueEvent();//屏蔽蜂鸣器
+        public System.Threading.Timer ClearShieldBeepTimer;//Beep屏蔽状态清除Timer
+        public ValueChangeFilter DoorSensorCheck = new ValueChangeFilter();//开门传感器滤波检测
+        public ValueChangeFilter SafeSensorCheck = new ValueChangeFilter();//安全传感器检测
         //定义读取通用输出、输入的IO值
         public int Exi_16bit, Exo_16bit;
         //定义Axis状态值、Clock值 
@@ -45,18 +54,22 @@ namespace DG_Laser
         public bool Timer_1s_Flag;
         //定义GTS函数调用返回值
         public short Gts_Return;
+
         //定义Gts X/Y轴回零标志
         public bool Gts_Home_Flag;
 
         //清除上位机回零完成标志
-        private ValueChangeEvent Axis01_Homed_Status = new ValueChangeEvent();
-        private ValueChangeEvent Axis02_Homed_Status = new ValueChangeEvent();
+        private SpecifyValueEvent Axis01_Homed_Status = new SpecifyValueEvent();
+        private SpecifyValueEvent Axis02_Homed_Status = new SpecifyValueEvent();
 
         //构造函数
         public IO() 
         {
-            Axis01_Homed_Status.Greater_Than_Change += Axis01_Homed_Change;
-            Axis02_Homed_Status.Greater_Than_Change += Axis02_Homed_Change;
+            GlobalEMG = false;
+            Axis01_Homed_Status.Value_1 += Axis01_Homed_Change;
+            Axis02_Homed_Status.Value_1 += Axis02_Homed_Change;
+            ClearShieldBeepTimer = new System.Threading.Timer(delegate(object Sender) { Thread.Sleep(1000); }, null, Timeout.Infinite, Timeout.Infinite);
+            Shield_Beep.Value_1 += ClearShieldBeep_1;
         }
         /// <summary>
         /// 刷新状态
@@ -109,10 +122,29 @@ namespace DG_Laser
             EXI5 = (Exi_16bit & (1 << 5)) == 0;// 右门禁传感器
             EXI6 = (Exi_16bit & (1 << 6)) == 0;// 启动按钮1
             EXI7 = (Exi_16bit & (1 << 7)) == 0;// 启动按钮1 
+            EXI8 = (Exi_16bit & (1 << 8)) == 0;// 真空压力达标 
+            EXI9 = (Exi_16bit & (1 << 9)) == 0;// 安全传感器
+
+
+            //刷新急停按钮状态
+            if (EXI1 || SoftEMG)//按下，急停触发
+            {
+                EMGButton.Variable = 1;
+            }
+            else//抬起，急停解除
+            {
+                EMGButton.Variable = 0;
+            }
 
             //输出按钮灯
             if (EXI6) { Button1_Lamp = 1; } else { Button1_Lamp = 0; };
-            if (EXI7) { Button2_Lamp = 1; } else { Button2_Lamp = 0; };   
+            if (EXI7) { Button2_Lamp = 1; } else { Button2_Lamp = 0; };
+
+            //刷新门传感器滤波函数值
+            DoorSensorCheck.Variable = (EXI4 && EXI5) ? 1 : 0;
+
+            //刷新安全传感器
+            SafeSensorCheck.Variable = EXI9 ? 1 : 0;
 
             //输出照明灯
             //if ((!EXI4) || (!EXI5)) { Lamp_control = 1; } else { Lamp_control = 0; };
@@ -130,7 +162,9 @@ namespace DG_Laser
             EXO10 = (Exo_16bit & (1 << 10)) == 0;// 启动按钮2灯 
             EXO11 = (Exo_16bit & (1 << 11)) == 0;// X轴回零触发
             EXO12 = (Exo_16bit & (1 << 12)) == 0;// Y轴回零触发
-
+            EXO13 = (Exo_16bit & (1 << 13)) == 0;// 红光开
+            EXO14 = (Exo_16bit & (1 << 14)) == 0;// 门打开
+            EXO15 = (Exo_16bit & (1 << 15)) == 0;// 门关闭
             //刷新Axis01 状态
             Axis01_Limit_Up = (Axis01_Sta & (1 << 5)) != 0;// Axis01轴正限位
             Axis01_Limit_Down = (Axis01_Sta & (1 << 6)) != 0;// Axis01轴负限位
@@ -159,69 +193,55 @@ namespace DG_Laser
             Axis02_Motor_Posed = (Axis_Posed_Sta & (1 << 1)) != 0; ;// Axis02轴 电机到位
             Axis02_Upper_Posed = (Axis02_Sta & (1 << 11)) != 0;// Axis02轴 上位机到位
 
+            //轴故障
+            Axis01_Err_Occur = Axis01_Limit_Up || Axis01_Limit_Down || Axis01_Alarm || Axis01_MC_Err || Axis01_IO_EMG;
+            Axis02_Err_Occur = Axis02_Limit_Up || Axis02_Limit_Down || Axis02_Alarm || Axis02_MC_Err || Axis02_IO_EMG;
+
             //刷新轴原点状态
-            Gts_Home_Flag = !(Axis01_Limit_Up || Axis01_Limit_Down || Axis01_Alarm || Axis01_MC_Err || Axis01_IO_EMG) && Axis01_Home && Program.SystemContainer.GTS_Fun.Axis01_Homed && !(Axis02_Limit_Up || Axis02_Limit_Down || Axis02_Alarm || Axis02_MC_Err || Axis02_IO_EMG) && Axis02_Home && Program.SystemContainer.GTS_Fun.Axis02_Homed;//任意（轴限位、报警、使能关闭、急停），致使原点标志丢失
+            Gts_Home_Flag = !Axis01_Err_Occur && Axis01_Home && Program.SystemContainer.GTS_Fun.Axis01_Homed && !Axis02_Err_Occur && Axis02_Home && Program.SystemContainer.GTS_Fun.Axis02_Homed;//任意（轴限位、报警、使能关闭、急停），致使原点标志丢失
+        
             //轴1
-            if ((Axis01_Limit_Up || Axis01_Limit_Down || Axis01_Alarm || Axis01_MC_Err || Axis01_IO_EMG) && Program.SystemContainer.GTS_Fun.Axis01_Homed)
+            if (Axis01_Err_Occur && Program.SystemContainer.GTS_Fun.Axis01_Homed)//轴故障发生，同时轴已经回零
                 Axis01_Homed_Status.Variable = 1;
             else
                 Axis01_Homed_Status.Variable = 0;
             //轴2
-            if ((Axis02_Limit_Up || Axis02_Limit_Down || Axis02_Alarm || Axis02_MC_Err || Axis02_IO_EMG) && Program.SystemContainer.GTS_Fun.Axis02_Homed)
+            if (Axis02_Err_Occur && Program.SystemContainer.GTS_Fun.Axis02_Homed)//轴故障发生，同时轴已经回零
                 Axis02_Homed_Status.Variable = 1;
             else
                 Axis02_Homed_Status.Variable = 0;
 
+           
+            //全局报警
+            GlobalAlarm = Axis01_Err_Occur || Axis02_Err_Occur;
 
-            //轴1回零触发            
-            if (Axis01_Home_Ex0_Control == 1)//轴1回零
+            //全局警告报警处理
+            if (GlobalAlarm || GlobalWarning)
             {
-                Gts_Return = MC.GT_SetDoBit(12, 12, 0);
+                Yellow_lamp = 0;//黄色
+                Green_lamp = 0;//绿色
+                Red_lamp = 1;//红色
+                Beeze_Control = 1;
             }
             else
             {
-                Gts_Return = MC.GT_SetDoBit(12, 12, 1);
-            }
-            //轴2回零触发  
-            if (Axis02_Home_Ex0_Control == 1)//轴2回零
-            {
-                Gts_Return = MC.GT_SetDoBit(12, 13, 0);
-            }
-            else
-            {
-                Gts_Return = MC.GT_SetDoBit(12, 13, 1);
+                if (GlobalRunnig)
+                {
+                    Yellow_lamp = 0;//黄色
+                    Green_lamp = 1;//绿色
+                    Red_lamp = 0;//红色
+                }
+                else
+                {
+                    Yellow_lamp = 1;//黄色
+                    Green_lamp = 0;//绿色
+                    Red_lamp = 0;//红色
+                }
+                Beeze_Control = 0;
             }
             //输出控制 0-输出，1-关闭输出
             //Cyc_control, Blow_control, Lamp_control;//定义气缸、吹气、照明控制字
-            //气缸控制
-            if (Cyc_control == 1)//气缸打开
-            {
-                Gts_Return = MC.GT_SetDoBit(12, 6, 0);
-                Gts_Return = MC.GT_SetDoBit(12, 7, 1);
-            }
-            else
-            {
-                Gts_Return = MC.GT_SetDoBit(12, 6, 1);
-                Gts_Return = MC.GT_SetDoBit(12, 7, 0);
-            }
-            //吹气控制
-            if (Blow_control == 1)//吹气打开
-            {
-                Gts_Return = MC.GT_SetDoBit(12, 8, 0);
-            }
-            else
-            {
-                Gts_Return = MC.GT_SetDoBit(12, 8, 1);
-            }
-            //照明控制
-            if (Lamp_control == 1)//照明打开
-            {
-                Gts_Return = MC.GT_SetDoBit(12, 9, 0);
-            }
-            else
-            {
-                Gts_Return = MC.GT_SetDoBit(12, 9, 1);
-            }
+            
             //Yellow_lamp,Green_lamp,Red_lamp,Beeze_Control,Button1_Lamp, Button2_Lamp;//定义灯塔黄、灯塔绿、灯塔红、蜂鸣控制字
             //灯塔黄控制
             if (Yellow_lamp == 1)
@@ -266,6 +286,35 @@ namespace DG_Laser
             {
                 Gts_Return = MC.GT_SetDoBit(12, 5, 1);
             }
+            //气缸控制
+            if (Cyc_control == 1)//气缸打开
+            {
+                Gts_Return = MC.GT_SetDoBit(12, 6, 0);
+                Gts_Return = MC.GT_SetDoBit(12, 7, 1);
+            }
+            else
+            {
+                Gts_Return = MC.GT_SetDoBit(12, 6, 1);
+                Gts_Return = MC.GT_SetDoBit(12, 7, 0);
+            }
+            //吹气控制
+            if (Blow_control == 1)//吹气打开
+            {
+                Gts_Return = MC.GT_SetDoBit(12, 8, 0);
+            }
+            else
+            {
+                Gts_Return = MC.GT_SetDoBit(12, 8, 1);
+            }
+            //照明控制
+            if (Lamp_control == 1)//照明打开
+            {
+                Gts_Return = MC.GT_SetDoBit(12, 9, 0);
+            }
+            else
+            {
+                Gts_Return = MC.GT_SetDoBit(12, 9, 1);
+            }
             //Button1_Lamp, Button2_Lamp;//定义启动按钮1灯、启动按钮2灯控制字
             //启动按钮1灯
             if (Button1_Lamp == 1)
@@ -285,23 +334,72 @@ namespace DG_Laser
             {
                 Gts_Return = MC.GT_SetDoBit(12, 11, 1);
             }
+            //轴1回零触发            
+            if (Axis01_Home_Ex0_Control == 1)//轴1回零
+            {
+                Gts_Return = MC.GT_SetDoBit(12, 12, 0);
+            }
+            else
+            {
+                Gts_Return = MC.GT_SetDoBit(12, 12, 1);
+            }
+            //轴2回零触发  
+            if (Axis02_Home_Ex0_Control == 1)//轴2回零
+            {
+                Gts_Return = MC.GT_SetDoBit(12, 13, 0);
+            }
+            else
+            {
+                Gts_Return = MC.GT_SetDoBit(12, 13, 1);
+            }
+
+            //红色激光控制
+            if (RedLaser_Control == 1)
+            {
+                Gts_Return = MC.GT_SetDoBit(12, 14, 0);
+            }
+            else
+            {
+                Gts_Return = MC.GT_SetDoBit(12, 14, 1);
+            }
+
+            //门控制
+            if (Door_Control == 1)
+            {
+                Gts_Return = MC.GT_SetDoBit(12, 15, 0);
+                Gts_Return = MC.GT_SetDoBit(12, 16, 1);
+            }
+            else
+            {
+                Gts_Return = MC.GT_SetDoBit(12, 15, 1);
+                Gts_Return = MC.GT_SetDoBit(12, 16, 0);
+            }
 
             //刷新双启按钮状态
             if (EXI4 && EXI5 && EXI6 && EXI7 && Gts_Home_Flag)
-                MainForm.Start_Button.Variable = 1;
+                Start_Button.Variable = 1;
             else
-                MainForm.Start_Button.Variable = 0;
-
+                Start_Button.Variable = 0;
         }
-
+        /// <summary>
+        /// 轴1清除回零状态
+        /// </summary>
         private void Axis01_Homed_Change()
         {
             if (Program.SystemContainer.GTS_Fun.Axis01_Homed) Program.SystemContainer.GTS_Fun.Axis01_Homed = false;
         }
+        /// <summary>
+        /// 轴2清除回零状态
+        /// </summary>
         private void Axis02_Homed_Change()
         {
             if (Program.SystemContainer.GTS_Fun.Axis02_Homed) Program.SystemContainer.GTS_Fun.Axis02_Homed = false;
         }
+        /// <summary>
+        /// 蜂鸣器
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void Timer_1s(object sender, ElapsedEventArgs e)
         {
             Timer_1s_Flag = !Timer_1s_Flag;
@@ -314,6 +412,32 @@ namespace DG_Laser
         public void Clear(object sender, EventArgs e)
         {
             Timer_1s_Flag = false;
+        }
+        /// <summary>
+        /// 解除蜂鸣器屏蔽
+        /// </summary>
+        public void ClearShieldBeep_1()
+        {
+            int Duration = 0;
+            if (Program.SystemContainer.SysPara.ShieldBeepTime == 0)
+            {
+                Duration = 120;//2Min
+            }
+            else
+            {
+                Duration = Program.SystemContainer.SysPara.ShieldBeepTime;
+            }
+            //初始化定时器
+            ClearShieldBeepTimer = new System.Threading.Timer(
+                delegate(object sender)
+                {
+                    Shield_Beep.Variable = 0;
+                    ClearShieldBeepTimer.Change(Timeout.Infinite, Timeout.Infinite);//取消触发
+                },
+                null,
+                0,
+                Duration * 1000
+                );           
         }
     }
 }

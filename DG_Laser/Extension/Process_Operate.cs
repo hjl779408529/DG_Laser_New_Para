@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.IO;
 
-namespace Laser_Version2._0
+namespace DG_Laser
 {
     class Process_Operate
     {

@@ -23,14 +23,14 @@ namespace DG_Laser
             //初始化
             SystemContainer = new Initial();
             SystemContainer.Common_Initial();//参数和用户初始化
-            SystemContainer.Load_Repeat_Para();//重复参数初始化
-            SystemContainer.Load_Scissor_Para();//刀具参数初始化
-            SystemContainer.RS232_Initial();//232初始化
             SystemContainer.Tcp_Initial();//Tcp初始化
+            SystemContainer.Load_Scissor_Para();//刀具参数初始化
+            SystemContainer.Load_Material_Storage();//读取材料库
+            SystemContainer.RS232_Initial();//232初始化            
             SystemContainer.Gts_Initial();//Gts工控卡初始化
             SystemContainer.Rtc_Initial();//Rtc工控卡初始化
             SystemContainer.TimerEN();//定时器启动
-
+            
             BonusSkins.Register();
             SkinManager.EnableFormSkins();
             new MainForm().Show();

@@ -166,5 +166,26 @@ namespace DG_Laser
                 }
             });
         }
+        /// <summary>
+        /// 红色激光触发
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void RedLaserButton_Click(object sender, EventArgs e)
+        {
+            this.Invoke((EventHandler)delegate
+            {
+                if (Program.SystemContainer.IO.RedLaser_Control == 0)
+                {
+                    Program.SystemContainer.IO.RedLaser_Control = 1;
+                    RedLaserButton.Text = "红色激光打开";
+                }
+                else
+                {
+                    Program.SystemContainer.IO.RedLaser_Control = 0;
+                    RedLaserButton.Text = "红色激光关闭";
+                }
+            });
+        }
     }
 }
